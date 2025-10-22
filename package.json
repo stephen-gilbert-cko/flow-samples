@@ -1,0 +1,19 @@
+{
+  "name": "flow-samples",
+  "version": "1.0.0",
+  "description": "Sample implementations of Checkout.com Flow",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "author": "checkout.com",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.12"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

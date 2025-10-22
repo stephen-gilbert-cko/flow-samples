@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Checkout Web Components: Flow Component</title>
+    <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+
+    <div id="successToast" class="toast success">
+        <span>The payment was successful</span>
+    </div>
+
+    <div id="failedToast" class="toast failed">
+        <span>The payment failed, try again</span>
+    </div>
+
+    <form>
+        <div id="componentSelector" class="selector">
+            <label for="componentOptions">Pick a component to render:</label>
+    
+            <select name="componentOptions" id="componentOptions" onchange="updateComponent()">
+                <option value="flow">Flow (Accordion)</option>
+                <option value="card">Card</option>
+                <option value="address">Email, Shipping Address, Card</option>
+                <option value="applepay">Apple Pay (Requires HTTPS)</option>
+                <option value="googlepay">Google Pay</option>
+            </select>
+        </div>
+
+        <div class="container">
+            <div id="authentication-container"></div>
+            <div id="address-container"></div>
+            <div id="flow-container"></div>
+        </div>
+        <span id="error-message"></span>
+        <span id="successful-payment-message"></span>
+    </form>
+
+    <script src="https://checkout-web-components.checkout.com/index.js"></script>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
