@@ -1,95 +1,143 @@
-
-const express = require("express");
 const fetch = require("node-fetch");
+const express = require("express");
 const app = express();
-
 app.use(express.static("public"));
 app.use(express.json());
 
-const { secretKey, publicKey } = require("./config");
+const { publicKey, secretKey, processingChannelId, customerId } = require("./config");
 
+// Get public API key and customer ID from config
 app.get("/config", (_req, res) => {
-  res.json({ publicKey });
+  res.json({ publicKey, customerId });
 });
 
-app.post("/create-payment-sessions", async (_req, res) => {
-  // Create a PaymentSession
-  const request = await fetch(
-    "https://api.sandbox.checkout.com/payment-sessions",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${secretKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        amount: 2000,
-        currency: "GBP",
-        reference: "ORD-123A",
-        display_name: "Online Shop",
-        payment_type: "Regular",
-        description: "Payment for Guitars and Amps",
-        capture: false,
-        // "processing_channel_id": "pc_62zqlrkat65e5epwbh7jo53z5i",
-        payment_method_configuration: {
-          applepay: {
-            store_payment_details: "enabled",
-          },
-          card: {
-            store_payment_details: "collect_consent",
-          },
-          stored_card: {
-            customer_id: "cus_cvgrhbyexukubc46yuv6uittla",
-          },
-          googlepay: {
-            store_payment_details: "enabled",
-          },
+app.post("/create-payment-session", async (req, res) => {
+  try {
+    const {
+      amount,
+      currency,
+      billing,
+      success_url,
+      failure_url,
+      payment_type,
+      billing_descriptor,
+      reference,
+      description,
+      customer,
+      shipping,
+      recipient,
+      processing,
+      instruction,
+      processing_channel_id,
+      payment_method_configuration,
+      items,
+      amount_allocations,
+      risk,
+      display_name,
+      metadata,
+      locale,
+      "3ds": threeDS,
+      sender,
+      capture,
+      capture_on,
+      expires_on,
+      enabled_payment_methods,
+      disabled_payment_methods,
+      customer_retry,
+    } = req.body;
+
+    const request = await fetch(
+      "https://api.sandbox.checkout.com/payment-sessions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${secretKey}`,
+          "Content-Type": "application/json",
         },
-        enabled_payment_methods: ["card", "stored_card", "applepay", "googlepay", "paypal"],
-        billing_descriptor: {
-          name: "Jia Tsang",
-          city: "London",
-        },
-        customer: {
-          id: "cus_cvgrhbyexukubc46yuv6uittla",
-          email: "nagpal.mukesh@gmail.com",
-          name: "nagpal.mukesh@gmail.com",
-          phone: {
-            country_code: "+1",
-            number: "415 555 2671",
+        body: JSON.stringify({
+          amount: amount || 3000,
+          currency: currency || "GBP",
+          billing: billing || {
+            address: {
+              address_line1: "123 High St.",
+              address_line2: "Flat 456",
+              city: "London",
+              zip: "SW1A 1AA",
+              country: "GB",
+            },
+            phone: {
+              number: "7987654321",
+              country_code: "+44",
+            },
           },
-        },
-        billing: {
-          address: {
-            address_line1: "123 High St.",
-            address_line2: "Flat 456",
+          success_url: success_url || "http://localhost:3000?status=succeeded",
+          failure_url: failure_url || "http://localhost:3000?status=failed",
+          payment_type: payment_type || "Regular",
+          billing_descriptor: billing_descriptor || {
+            name: "Checkout.com",
             city: "London",
-            zip: "SW1A 1AA",
-            country: "GB",
           },
-          phone: {
-            number: "1234567890",
-            country_code: "+44",
+          reference: reference || "1234567890",
+          description: description || "Payment",
+          customer: customer || {
+            email: "john.smith@mail.com",
+            name: "John Smith",
+            phone: {
+              country_code: "+44",
+              number: "7987654321",
+            },
           },
-        },
-        risk: {
-          enabled: true,
-        },
-        "3ds": {
-          enabled: true,
-        },
-        success_url:
-          "http://localhost:3000?status=succeeded",
-        failure_url:
-          "http://localhost:3000?status=failed",
-        metadata: {},
-      }),
-    }
-  );
+          shipping: shipping || {
+            address: {
+              address_line1: "123 High St.",
+              address_line2: "Flat 456",
+              city: "London",
+              zip: "SW1A 1AA",
+              country: "GB",
+            },
+            phone: {
+              number: "7987654321",
+              country_code: "+44",
+            },
+          },
+          recipient: recipient,
+          processing: processing,
+          instruction: instruction,
+          processing_channel_id: processing_channel_id || processingChannelId,
+          payment_method_configuration: payment_method_configuration,
+          items: items || [
+            {
+              name: "T-shirt",
+              quantity: 1,
+              unit_price: 3000,
+            },
+          ],
+          amount_allocations: amount_allocations,
+          risk: risk,
+          display_name: display_name,
+          metadata: metadata,
+          locale: locale,
+          "3ds": threeDS,
+          sender: sender,
+          capture: capture,
+          capture_on: capture_on,
+          expires_on: expires_on,
+          enabled_payment_methods: enabled_payment_methods,
+          disabled_payment_methods: disabled_payment_methods,
+          customer_retry: customer_retry,
+        }),
+      }
+    );
 
-  const parsedPayload = await request.json();
+    const parsedPayload = await request.json();
 
-  res.status(request.status).send(parsedPayload);
+    res.status(request.status).send(parsedPayload);
+  } catch (error) {
+    console.error("Error creating payment session:", error);
+    res.status(500).json({
+      error: "Internal server error while creating payment session",
+    });
+  }
 });
 
 app.listen(3000, () =>

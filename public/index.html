@@ -3,46 +3,74 @@
 
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Checkout Web Components: Flow Component</title>
-    <link rel="stylesheet" href="./style.css" />
+    <title>Flow Samples</title>
+    <style type="text/css">
+        * {
+            font-family: monospace;
+            font-size: 1rem;
+            line-height: 1.2;
+            color: #333;
+            margin: 0;
+            padding: 1rem;
+            text-wrap: wrap;
+            text-indent: -1rem;
+        }
+
+        a {
+            text-decoration: none;
+            color: #186aff;
+            padding: 0;
+        }
+
+        a:hover {
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            text-decoration-thickness: 0.1rem;
+            color: #0d4ed8;
+            background-color: #f0f0f0;
+            border-radius: 0.2rem;
+        }
+
+        .docs-icon {
+            padding: 0;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            * {
+                padding: 0.5rem;
+                text-indent: 8rem hanging each-line;
+            }
+        }
+    </style>
 </head>
 
 <body>
-
-    <div id="successToast" class="toast success">
-        <span>The payment was successful</span>
-    </div>
-
-    <div id="failedToast" class="toast failed">
-        <span>The payment failed, try again</span>
-    </div>
-
-    <form>
-        <div id="componentSelector" class="selector">
-            <label for="componentOptions">Pick a component to render:</label>
-    
-            <select name="componentOptions" id="componentOptions" onchange="updateComponent()">
-                <option value="flow">Flow (Accordion)</option>
-                <option value="card">Card</option>
-                <option value="address">Email, Shipping Address, Card</option>
-                <option value="applepay">Apple Pay (Requires HTTPS)</option>
-                <option value="googlepay">Google Pay</option>
-            </select>
-        </div>
-
-        <div class="container">
-            <div id="authentication-container"></div>
-            <div id="address-container"></div>
-            <div id="flow-container"></div>
-        </div>
-        <span id="error-message"></span>
-        <span id="successful-payment-message"></span>
-    </form>
-
-    <script src="https://checkout-web-components.checkout.com/index.js"></script>
-
-    <script src="app.js"></script>
+    <pre>
+<strong>flow samples &lt;/&gt;</strong>
+│
+├──<strong>☰ accordion</strong>
+│   
+│   ├── <a href="flow-accordion/no-storage/">without card storage</a>
+│   ├── <a href="flow-accordion/with-storage/">with card storage</a>
+│   └── <a href="flow-accordion/stored-card/">with card storage + stored card selection</a>
+│
+├──<strong>🧩 standalone components</strong>   
+│   
+│   ├──<strong>💸 payment</strong>
+│   │
+│   │   ├── <a href="standalone-components/payment/no-storage/">without card storage</a>
+│   │   ├── <a href="standalone-components/payment/with-storage/">with card storage</a>
+│   │   └── <a href="standalone-components/payment/stored-card/">with card storage + stored card selection</a>
+│   │
+│   └──<strong>🔐 tokenization only</strong>
+│       
+│       ├── <a href="standalone-components/tokenize-only/auth-payment/">standalone authentication + payment</a>
+│       ├── <a href="standalone-components/tokenize-only/vault-auth-payment/">vault credentials + standalone authentication + payment</a>
+│       └── <a href="standalone-components/tokenize-only/vault-forward/">vault credentials + forward</a>
+│
+└──<span class="docs-icon"> 📖 </span><a href="https://www.checkout.com/docs/payments/accept-payments/accept-a-payment-on-your-website" target="_blank">docs</a>
+    </pre>
 </body>
 
 </html>

@@ -1,23 +1,10 @@
-const componentSelector = document.getElementById("componentOptions");
-const chosenComponent = localStorage.getItem("chosenComponent");
-componentSelector.value = chosenComponent;
-
-function updateComponent() {
-  let currentSelection = document.getElementById("componentOptions").value;
-
-  if (currentSelection !== chosenComponent) {
-    localStorage.setItem("chosenComponent", currentSelection);
-    location.reload();
-  }
-}
-
 /* global CheckoutWebComponents */
 (async () => {
   // Fetch the publicKey from the server
   const configResponse = await fetch("/config");
   const { publicKey } = await configResponse.json();
   
-  const response = await fetch("/create-payment-sessions", { method: "POST" }); // Order
+  const response = await fetch("/create-payment-session", { method: "POST" });
   const paymentSession = await response.json();
 
   if (!response.ok) {
@@ -49,36 +36,33 @@ function updateComponent() {
   });
 
   const flowContainer = document.getElementById("flow-container");
-
-  if (chosenComponent === "address") {
-    const authenticationContainer = document.getElementById("authentication-container");
-    const addressContainer = document.getElementById("address-container");
-    
-    const authenticationComponent = checkout.create("authentication", {
-      onChange: (_self, data) => {
-        console.log(data.email);
-      },
-    });
-    const addressComponent = checkout.create("shipping_address", {
-      onChange: (_self, data) => {
-        console.log(data.shippingAddress);
-      },
-    });
-    const cardComponent = checkout.create("card");
-    if (
-      (await authenticationComponent.isAvailable()) &&
-      (await cardComponent.isAvailable()) &&
-      (await addressComponent.isAvailable())
-    ) {
-      authenticationComponent.mount(authenticationContainer);
-      cardComponent.mount(flowContainer);
-      addressComponent.mount(addressContainer);
-    }
-  } else {
-    const flowComponent = checkout.create("flow");
-    if (await flowComponent.isAvailable()) {
-      flowComponent.mount(flowContainer);
-    }
+  const authenticationContainer = document.getElementById("authentication-container");
+  const addressContainer = document.getElementById("address-container");
+  
+  const authenticationComponent = checkout.create("authentication", {
+    onChange: (_self, data) => {
+      console.log("Authentication data:", data);
+    },
+  });
+  const addressComponent = checkout.create("shipping_address", {
+    onChange: (_self, data) => {
+      console.log("Address data:", data);
+    },
+  });
+  const cardComponent = checkout.create("card", {
+    onChange: (_self, data) => {
+      console.log("Card tokenization data:", data);
+    },
+  });
+  
+  if (
+    (await authenticationComponent.isAvailable()) &&
+    (await cardComponent.isAvailable()) &&
+    (await addressComponent.isAvailable())
+  ) {
+    authenticationComponent.mount(authenticationContainer);
+    cardComponent.mount(flowContainer);
+    addressComponent.mount(addressContainer);
   }
 })();
 
