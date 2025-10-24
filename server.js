@@ -3,8 +3,54 @@ const express = require("express");
 const app = express();
 app.use(express.static("public"));
 app.use(express.json());
+const { publicKey, secretKey, accessKeyId, accessKeySecret, processingChannelId, customerId} = require("./config");
+const port = process.env.PORT || 3000;
 
-const { publicKey, secretKey, processingChannelId, customerId } = require("./config");
+// Cache for access token
+let accessToken = null;
+let tokenExpiry = null;
+
+async function getAccessToken() {
+  // Check if access key credentials provided
+  if (!accessKeyId || !accessKeySecret) {
+    return null;
+  }
+
+  // Check for a valid cached token
+  if (accessToken && tokenExpiry && Date.now() < tokenExpiry) {
+    return accessToken;
+  }
+
+  try {
+    const response = await fetch('https://access.sandbox.checkout.com/connect/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: new URLSearchParams({
+        grant_type: 'client_credentials',
+        client_id: accessKeyId,
+        client_secret: accessKeySecret,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Failed to get access token: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    accessToken = data.access_token;
+    
+    // Default expiry = 4 hours
+    const expiresIn = (data.expires_in || 14400) * 1000; // Convert to milliseconds
+    tokenExpiry = Date.now() + expiresIn - 60000; // Subtract 1 minute for safety
+    
+    return accessToken;
+  } catch (error) {
+    console.error('Error getting access token:', error);
+    throw error;
+  }
+}
 
 // Get public API key and customer ID from config
 app.get("/config", (_req, res) => {
@@ -46,12 +92,22 @@ app.post("/create-payment-session", async (req, res) => {
       customer_retry,
     } = req.body;
 
+    // Try to get access token; fallback to secret key
+    const token = await getAccessToken();
+    const authToken = token || secretKey;
+
+    if (!authToken) {
+      return res.status(500).json({
+        error: "No authentication credentials provided. Please set ACCESS_KEY_ID + ACCESS_KEY_SECRET or SECRET_KEY in .env file.",
+      });
+    }
+
     const request = await fetch(
       "https://api.sandbox.checkout.com/payment-sessions",
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${secretKey}`,
+          Authorization: `Bearer ${authToken}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
@@ -140,6 +196,6 @@ app.post("/create-payment-session", async (req, res) => {
   }
 });
 
-app.listen(3000, () =>
-  console.log("Node server listening on port 3000: http://localhost:3000/")
+app.listen(port, () =>
+  console.log(`Node server listening on port ${port}: http://localhost:${port}/`)
 );

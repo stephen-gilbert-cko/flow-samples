@@ -47,9 +47,9 @@
       },
     },
     success_url:
-      "http://localhost:3000/standalone-components/payment/no-storage?status=succeeded",
+      "http://localhost:3000/standalone-components/payment/with-storage?status=succeeded",
     failure_url:
-      "http://localhost:3000/standalone-components/payment/no-storage?status=failed",
+      "http://localhost:3000/standalone-components/payment/with-storage?status=failed",
   };
 
   const response = await fetch("/create-payment-session", {

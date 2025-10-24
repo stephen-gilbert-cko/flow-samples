@@ -46,8 +46,8 @@
         store_payment_details: "collect_consent",
       }
     },
-    success_url: "http://localhost:3000/flow-accordion-stored-card?status=succeeded",
-    failure_url: "http://localhost:3000/flow-accordion-stored-card?status=failed",
+    success_url: "http://localhost:3000/flow-accordion/with-storage?status=succeeded",
+    failure_url: "http://localhost:3000/flow-accordion/with-storage?status=failed",
   };
 
   const response = await fetch("/create-payment-session", {

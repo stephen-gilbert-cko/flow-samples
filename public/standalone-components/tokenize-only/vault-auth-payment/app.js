@@ -1,52 +1,28 @@
 /* global CheckoutWebComponents */
 (async () => {
   const config = await fetch("/config");
-  const { publicKey, customerId } = await config.json();
-  
+  const { publicKey } = await config.json();
+
   const requestPayload = {
-    amount: 15000,
-    currency: "AED",
-    reference: "ORDER-12345",
-    description: "Payment for order 12345",
-    items: [
-      {
-        name: "T-shirt",
-        quantity: 1,
-        unit_price: 15000,
-      },
-    ],
+    amount: 3000,
+    currency: "GBP",
     billing: {
       address: {
-        address_line1: "123 Main Street",
-        address_line2: "Apt 1",
-        city: "Dubai",
-        zip: "12345",
-        country: "AE",
+        address_line1: "123 High St.",
+        address_line2: "Flat 456",
+        city: "London",
+        zip: "SW1A 1AA",
+        country: "GB",
       },
       phone: {
         number: "7987654321",
-        country_code: "+971",
+        country_code: "+44",
       },
     },
-    shipping: {
-      address: {
-        address_line1: "123 Main Street",
-        address_line2: "Apt 1",
-        city: "Dubai",
-        zip: "12345",
-        country: "AE",
-      },
-    },
-    payment_method_configuration: {
-      card: {
-        store_payment_details: "collect_consent",
-      },
-      stored_card: {
-        customer_id: customerId,
-      },
-    },
-    success_url: "http://localhost:3000/flow-accordion/stored-card?status=succeeded",
-    failure_url: "http://localhost:3000/flow-accordion/stored-card?status=failed",
+    success_url:
+      "http://localhost:3000/standalone-components/tokenize-only/auth-payment?status=succeeded",
+    failure_url:
+      "http://localhost:3000/standalone-components/tokenize-only/auth-payment?status=failed",
   };
 
   const response = await fetch("/create-payment-session", {
@@ -87,12 +63,24 @@
   });
 
   const flowContainer = document.getElementById("flow-container");
-  const flowComponent = checkout.create("flow");
-  
-  if (await flowComponent.isAvailable()) {
-    flowComponent.mount(flowContainer);
+  const cardComponent = checkout.create("card", {
+    showPayButton: false,
+  });
+  if (await cardComponent.isAvailable()) {
+    cardComponent.mount(flowContainer);
   }
+
+  const cardPayButton = document.getElementById("card-pay-button");
+  cardPayButton.addEventListener("click", async () => {
+    const { data } = await cardComponent.tokenize();
+    console.log("Card tokenized: ", data);
+    await handleToken(data.token);
+  });
 })();
+
+async function handleToken(token) {
+  console.log("Token: ", token);
+}
 
 function triggerToast(id) {
   var element = document.getElementById(id);

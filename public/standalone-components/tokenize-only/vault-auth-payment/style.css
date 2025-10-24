@@ -1,0 +1,107 @@
+body {
+  margin: 2rem 3rem 3rem 3rem;
+  font-family: 'Monospace', monospace;
+}
+
+@media (max-width: 868px) {
+  body {
+    margin: 1.5rem;
+  }
+}
+
+.back-link {
+  margin-bottom: -1rem;
+}
+
+@media (max-width: 868px) {
+  .back-link {
+    margin-bottom: 2rem;
+  }
+}
+
+.back-link a {
+  font-family: monospace;
+  font-size: 1rem;
+  line-height: 1.2;
+  text-decoration: none;
+  color: #186aff;
+}
+
+.back-link a:hover {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 0.1rem;
+  color: #0d4ed8;
+  background-color: #f0f0f0;
+  border-radius: 0.2rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+p {
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+code {
+  background-color: #eeeeee;
+  border-radius: 3px;
+  padding: 0 3px;
+}
+
+.container {
+  text-align: center;
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+#flow-container {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.payment-method-container {
+  margin-bottom: 1.5rem;
+}
+
+/* Emulate Flow button style */
+#card-pay-button {
+  margin: 8px 0 0 0;
+  appearance: button;
+  -webkit-appearance: button;
+  align-items: center;
+  border: 0;
+  border-radius: 4px;
+  color: #FFFFFF;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', 'Noto Sans', 'Liberation Sans', Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  justify-content: center;
+  letter-spacing: 0;
+  line-height: 24px;
+  padding-bottom: 12px;
+  padding-left: 24px;
+  padding-right: 24px;
+  padding-top: 12px;
+  position: relative;
+  width: 100%;
+  background-color: rgb(24, 106, 255);
+}
+
+#card-pay-button span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+#card-pay-button span svg {
+  width: 16px;
+  height: 16px;
+}

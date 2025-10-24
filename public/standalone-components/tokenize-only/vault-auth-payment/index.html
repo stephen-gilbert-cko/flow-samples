@@ -4,36 +4,34 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Coming soon</title>
+    <title>Standalone components: vault credentials + separate authentication + payment</title>
     <link rel="stylesheet" href="../../../normalize.css" />
-    <style type="text/css">
-        * {
-            font-family: monospace;
-            font-size: 1rem;
-            line-height: 1.2;
-            color: #333;
-            margin: 0;
-            padding: 1rem;
-            text-wrap: wrap;
-        }
-    </style>
+    <link rel="stylesheet" href="./style.css" />
 </head>
 
 <body>
-    <div class="container">
-        <h1>Coming soon</h1>
-        <p>This example is coming soon</p>
-        
-        <div class="back-link">
-            <a href="../../../index.html">← Back to Flow Samples</a>
-        </div>
+    <div class="back-link">
+        <a href="../../../">← flow samples</a>
+    </div>
 
-        <div class="container">
-            <div id="authentication-container"></div>
-            <div id="address-container"></div>
-            <div id="flow-container"></div>
-        </div>
-        
+    <div class="container">
+        <h1>Standalone components: vault credentials + separate authentication + payment</h1>
+        <p>Card component with instrument creation, standalone 3DS authentication and payment</p>
+
+        <div id="flow-container"></div>
+        <button id="card-pay-button" type="button">
+            <span>
+                <svg color="#FFFFFF" backgroundColor="#ffffff"
+                    borderColor="#DDDDDD" data-testid="Lock" aria-hidden="true" focusable="false" fill="none"
+                    viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M4.66666 7.33337V4.66671C4.66666 3.78265 5.01785 2.93481 5.64297 2.30968C6.26809 1.68456 7.11593 1.33337 7.99999 1.33337C8.88405 1.33337 9.73189 1.68456 10.357 2.30968C10.9821 2.93481 11.3333 3.78265 11.3333 4.66671V7.33337M7.99999 10V12M13.3333 7.33337H2.66666V14.6667H13.3333V7.33337Z"
+                        stroke="currentColor" fill="none"></path>
+                </svg>
+                <span class="text">Pay</span>
+            </span>
+        </button>
+
         <span id="error-message"></span>
         <span id="successful-payment-message"></span>
     </div>
@@ -46,7 +44,7 @@
         <span>The payment failed, try again</span>
     </div>
 
-    <script src="app.js"></script>
+    <script src="https://checkout-web-components.checkout.com/index.js"></script>
     <script src="app.js"></script>
 </body>
 
