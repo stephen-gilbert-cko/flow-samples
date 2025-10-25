@@ -3,6 +3,10 @@ body {
   font-family: 'Monospace', monospace;
 }
 
+.hidden {
+  display: none !important;
+}
+
 @media (max-width: 868px) {
   body {
     margin: 1.5rem;
@@ -61,4 +65,29 @@ code {
 #flow-container {
   max-width: 100%;
   margin: 0 auto;
+}
+
+.loader {
+  height: 60px;
+  aspect-ratio: 1;
+  --c:no-repeat linear-gradient(#186AFF 0 0);
+  background: var(--c), var(--c), var(--c), var(--c);
+  background-size: 33.4% 33.4%;
+  animation: l2 1s infinite linear;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+}
+@keyframes l2 {
+  0%    {background-position:0   0  ,50%  0  ,0   50% ,50%  50%}
+  12.5% {background-position:50% 0  ,100% 0  ,0   50% ,50%  50%}
+  25%   {background-position:50% 0  ,100% 0  ,50% 50% ,100% 50%}
+  37.5% {background-position:50% 0  ,100% 50%,50% 50% ,100% 100%}
+  50%   {background-position:50% 50%,100% 50%,50% 100%,100% 100%}
+  62.5% {background-position:50% 50%,100% 50%,0   100%,50%  100%}
+  75%   {background-position:0   50%,50%  50%,0   100%,50%  100%}
+  87.5% {background-position:0   0  ,50%  50%,0   50% ,50%  100%}
+  100%  {background-position:0   0  ,50%  0  ,0   50% ,50%  50%}
 }

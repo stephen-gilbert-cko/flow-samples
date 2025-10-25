@@ -67,6 +67,18 @@
     paymentSession,
     onReady: () => {
       console.log("onReady");
+      
+      const pageLoader = document.getElementById("page-loader");
+      const pageContent = document.getElementById("page-content");
+      if (pageLoader) {
+        pageLoader.classList.add("hidden");
+        setTimeout(() => {
+          pageLoader.remove();
+        }, 300);
+      }
+      if (pageContent) {
+        pageContent.classList.remove("hidden");
+      }
     },
     onPaymentCompleted: (_component, paymentResponse) => {
       console.log("Payment completed: ", paymentResponse.id);

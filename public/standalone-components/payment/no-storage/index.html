@@ -10,26 +10,30 @@
 </head>
 
 <body>
-    <div class="back-link">
-        <a href="../../../">← flow samples</a>
-    </div>
+    <div id="page-loader" class="loader"></div>
 
-    <div class="container">
-        <h1>Standalone components: without card storage</h1>
-        <p>Payment method components with <code>store_payment_details</code> disabled</p>
+    <div id="page-content" class="page-content hidden">
+        <div class="back-link">
+            <a href="../../../">← flow samples</a>
+        </div>
 
-        <div id="flow-container"></div>
+        <div class="container">
+            <h1>Standalone components: without card storage</h1>
+            <p>Payment method components with <code>store_payment_details</code> disabled</p>
 
-        <span id="error-message"></span>
-        <span id="successful-payment-message"></span>
-    </div>
+            <div id="flow-container"></div>
 
-    <div id="successToast" class="toast success">
-        <span>The payment was successful</span>
-    </div>
+            <span id="error-message"></span>
+            <span id="successful-payment-message"></span>
+        </div>
 
-    <div id="failedToast" class="toast failed">
-        <span>The payment failed, try again</span>
+        <div id="successToast" class="toast success">
+            <span>The payment was successful</span>
+        </div>
+
+        <div id="failedToast" class="toast failed">
+            <span>The payment failed, try again</span>
+        </div>
     </div>
 
     <script src="https://checkout-web-components.checkout.com/index.js"></script>

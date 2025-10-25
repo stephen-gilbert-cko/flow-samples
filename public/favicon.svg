@@ -1,0 +1,17 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <style>
+    @media (prefers-color-scheme: light) {
+      path {
+        fill: black;
+      }
+    }
+    @media (prefers-color-scheme: dark) {
+      path {
+        fill: white;
+      }
+    }
+  </style>
+  <path fill-rule="evenodd" clip-rule="evenodd"
+    d="M108 36C108 27.1634 100.837 20 92 20H60C55.5817 20 52 23.5817 52 28V44H108V36ZM76 84H20V92C20 100.837 27.1634 108 36 108H68C72.4183 108 76 104.418 76 100V84ZM120 64C120 55.1634 112.837 48 104 48L24 48C15.1634 48 8 55.1634 8 64C8 72.8366 15.1634 80 24 80L104 80C112.837 80 120 72.8366 120 64Z"
+    fill="white" />
+</svg>

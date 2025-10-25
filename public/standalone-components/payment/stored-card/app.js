@@ -65,13 +65,35 @@
     return;
   }
 
+  // Payment methods to display
+  const componentTypes = ["applepay", "googlepay", "stored_card", "tamara"];
+  const readyComponents = new Set();
+  
+  const hideLoaderWhenAllReady = () => {
+    if (readyComponents.size === componentTypes.length) {      
+      const pageLoader = document.getElementById("page-loader");
+      const pageContent = document.getElementById("page-content");
+      if (pageLoader) {
+        pageLoader.classList.add("hidden");
+        setTimeout(() => {
+          pageLoader.remove();
+        }, 300);
+      }
+      if (pageContent) {
+        pageContent.classList.remove("hidden");
+      }
+    }
+  };
+
   const checkout = await CheckoutWebComponents({
     publicKey: publicKey,
     environment: "sandbox",
     locale: "en-GB",
     paymentSession,
-    onReady: () => {
-      console.log("onReady");
+    onReady: (component) => {
+      console.log(`onReady for "${component.type}"`);
+      readyComponents.add(component.type);
+      hideLoaderWhenAllReady();
     },
     onPaymentCompleted: (_component, paymentResponse) => {
       console.log("Payment completed: ", paymentResponse.id);
@@ -106,10 +128,13 @@
       if (await cardComponent.isAvailable()) {
         cardComponent.mount(container);
       }
+    } else {
+      console.log(`"${type}" is not available`);
+      readyComponents.add(type); // Mark as "ready" to avoid blocking the loader
+      hideLoaderWhenAllReady();
     }
   };
 
-  const componentTypes = ["applepay", "googlepay", "stored_card", "tamara"];
   await Promise.all(componentTypes.map(createPaymentComponent));
 })();
 
