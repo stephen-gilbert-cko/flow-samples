@@ -113,16 +113,35 @@ code {
 .dropdown-menu {
   display: inline-block;
   position: relative;
+  cursor: pointer;
 }
 
 .dropdown-arrow {
-  margin-left: 4px;
+  margin-left: 5px;
   text-decoration: none;
-  font-size: 0.9rem;
-  opacity: 0.7;
-  text-decoration: none;
+  font-size: 0.8rem;
+  font-weight: bold;
   position: relative;
-  bottom: 2px;
+  bottom: 3px;
+  color: #888;
+}
+
+.dropdown-arrow.open{
+  visibility: hidden;
+  right: 0.8rem;
+  top: 0.2rem;
+}
+
+.dropdown-arrow.closed{
+  visibility: visible;
+}
+
+.dropdown-menu:hover .dropdown-arrow.open {
+  visibility: visible;
+}
+
+.dropdown-menu:hover .dropdown-arrow.closed {
+  visibility: hidden;
 }
 
 .dropdown-item {
