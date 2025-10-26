@@ -16,7 +16,7 @@
       },
       phone: {
         number: "7987654321",
-        country_code: "+44",
+        country_code: "44",
       },
     },
     success_url:

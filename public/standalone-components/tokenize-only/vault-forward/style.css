@@ -162,7 +162,7 @@ code {
   visibility: hidden;
   position: absolute;
   top: 100%;
-  padding: 4px 8px 4px 0;
+  padding: 0 8px 4px 0;
   z-index: 10;
   white-space: nowrap;
   min-width: 100%;
@@ -178,10 +178,6 @@ code {
 
 .dropdown-item:not(.selected) + .dropdown-item:not(.selected) {
   top: calc(100% + 24px);
-}
-
-.dropdown-item:not(.selected) + .dropdown-item:not(.selected) + .dropdown-item:not(.selected) {
-  top: calc(100% + 48px);
 }
 
 .dropdown-menu:hover .dropdown-item:not(.selected) {

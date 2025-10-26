@@ -25,7 +25,7 @@
       },
       phone: {
         number: "7987654321",
-        country_code: "+971",
+        country_code: "971",
       },
     },
     shipping: {

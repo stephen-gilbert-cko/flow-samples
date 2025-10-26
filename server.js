@@ -123,7 +123,7 @@ app.post("/create-payment-session", async (req, res) => {
             },
             phone: {
               number: "7987654321",
-              country_code: "+44",
+              country_code: "44",
             },
           },
           success_url: success_url || "http://localhost:3000?status=succeeded",
@@ -139,7 +139,7 @@ app.post("/create-payment-session", async (req, res) => {
             email: "john.smith@mail.com",
             name: "John Smith",
             phone: {
-              country_code: "+44",
+              country_code: "44",
               number: "7987654321",
             },
           },
@@ -153,7 +153,7 @@ app.post("/create-payment-session", async (req, res) => {
             },
             phone: {
               number: "7987654321",
-              country_code: "+44",
+              country_code: "44",
             },
           },
           recipient: recipient,
@@ -192,6 +192,219 @@ app.post("/create-payment-session", async (req, res) => {
     console.error("Error creating payment session:", error);
     res.status(500).json({
       error: "Internal server error while creating payment session",
+    });
+  }
+});
+
+app.post("/create-authentication-session", async (req, res) => {
+  try {
+    const {
+      token,
+      amount,
+      currency,
+      billing_address,
+      mobile_phone,
+      email,
+      processing_channel_id: requestProcessingChannelId,
+      billing_descriptor,
+      reference,
+      shipping_address,
+      completion,
+    } = req.body;
+
+
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      return res.status(500).json({
+        error: "Access key credentials required for standalone authentication. Please set ACCESS_KEY_ID + ACCESS_KEY_SECRET in .env file.",
+      });
+    }
+
+    const request = await fetch(
+      "https://api.sandbox.checkout.com/sessions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          source: {
+            type: "token",
+            token: token,
+            billing_address: billing_address || {
+              address_line1: "123 High St.",
+              address_line2: "ABC building",
+              address_line3: "14 Wells Mews",
+              city: "London",
+              zip: "SW1A 1AA",
+              country: "GB",
+            },
+            mobile_phone: mobile_phone || {
+              country_code: "234",
+              number: "0204567895",
+            },
+            email: email || "bruce.wayne@email.com",
+          },
+          amount: amount || 6540,
+          currency: currency || "USD",
+          processing_channel_id: requestProcessingChannelId || processingChannelId,
+          billing_descriptor: billing_descriptor || {
+            name: "Checkout.com",
+          },
+          reference: reference || "ORD-5023-4E89",
+          shipping_address: shipping_address || {
+            address_line1: "123 High St.",
+            address_line2: "ABC building",
+            city: "London",
+            zip: "SW1A 1AA",
+            country: "GB",
+          },
+          completion: completion || {
+            type: "hosted",
+            success_url: "https://merchant.com/success",
+            failure_url: "https://merchant.com/failure",
+          },
+        }),
+      }
+    );
+
+    const parsedPayload = await request.json();
+
+    res.status(request.status).send(parsedPayload);
+  } catch (error) {
+    console.error("Error creating session:", error);
+    res.status(500).json({
+      error: "Internal server error while creating session",
+    });
+  }
+});
+
+app.post("/create-payment", async (req, res) => {
+  try {
+    const {
+      token,
+      authentication_id,
+      amount,
+      currency,
+      billing_address,
+      customer,
+      billing_descriptor,
+      reference,
+      description,
+      shipping,
+      capture,
+      capture_on,
+      risk,
+      success_url,
+      failure_url,
+      recipient,
+      metadata,
+      payment_type,
+      processing_channel_id: requestProcessingChannelId,
+    } = req.body;
+
+    // Try to get access token; fallback to secret key
+    const authToken = await getAccessToken() || secretKey;
+
+    if (!authToken) {
+      return res.status(500).json({
+        error: "No authentication credentials provided. Please set ACCESS_KEY_ID + ACCESS_KEY_SECRET or SECRET_KEY in .env file.",
+      });
+    }
+
+    if (!token) {
+      return res.status(400).json({
+        error: "Token is required",
+      });
+    }
+
+    // Extract billing address from billing object if provided
+    let sourceBillingAddress = billing_address;
+    if (!sourceBillingAddress && req.body.billing) {
+      const billing = req.body.billing;
+      sourceBillingAddress = {
+        address_line1: billing.address?.address_line1 || "123 High St.",
+        address_line2: billing.address?.address_line2 || "Flat 456",
+        city: billing.address?.city || "London",
+        zip: billing.address?.zip || "SW1A 1AA",
+        country: billing.address?.country || "GB",
+      };
+    }
+
+    const request = await fetch(
+      "https://api.sandbox.checkout.com/payments",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          source: {
+            type: "token",
+            token: token,
+            billing_address: sourceBillingAddress || {
+              address_line1: "123 High St.",
+              address_line2: "Flat 456",
+              city: "London",
+              zip: "SW1A 1AA",
+              country: "GB",
+            },
+          },
+          amount: amount || 3000,
+          currency: currency || "GBP",
+          payment_type: payment_type || "Regular",
+          reference: reference || "1234567890",
+          description: description || "Payment",
+          capture: capture,
+          capture_on: capture_on,
+          customer: customer || {
+            email: "john.smith@mail.com",
+            name: "John Smith",
+            phone: {
+              country_code: "44",
+              number: "7987654321",
+            },
+          },
+          billing_descriptor: billing_descriptor || {
+            name: "Checkout.com",
+            city: "London",
+          },
+          shipping: shipping || {
+            address: {
+              address_line1: "123 High St.",
+              address_line2: "Flat 456",
+              city: "London",
+              zip: "SW1A 1AA",
+              country: "GB",
+            },
+            phone: {
+              country_code: "44",
+              number: "7987654321",
+            },
+          },
+          "3ds": authentication_id ? {
+            enabled: true,
+            authentication_id: authentication_id,
+          } : undefined,
+          risk: risk,
+          processing_channel_id: requestProcessingChannelId || processingChannelId,
+          success_url: success_url || "http://localhost:3000?status=succeeded",
+          failure_url: failure_url || "http://localhost:3000?status=failed",
+          recipient: recipient,
+          metadata: metadata,
+        }),
+      }
+    );
+
+    const parsedPayload = await request.json();
+
+    res.status(request.status).send(parsedPayload);
+  } catch (error) {
+    console.error("Error creating payment:", error);
+    res.status(500).json({
+      error: "Internal server error while creating payment",
     });
   }
 });
