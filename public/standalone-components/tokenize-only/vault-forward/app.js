@@ -20,9 +20,9 @@
       },
     },
     success_url:
-      "http://localhost:3000/standalone-components/tokenize-only/auth-payment?status=succeeded",
+      `${window.location.origin}/standalone-components/tokenize-only/vault-forward?status=succeeded`,
     failure_url:
-      "http://localhost:3000/standalone-components/tokenize-only/auth-payment?status=failed",
+      `${window.location.origin}/standalone-components/tokenize-only/vault-forward?status=failed`,
   };
 
   const response = await fetch("/create-payment-session", {

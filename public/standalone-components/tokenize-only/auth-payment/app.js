@@ -37,9 +37,9 @@ const requestPayload = {
     },
   },
   success_url:
-    "http://localhost:3000/standalone-components/tokenize-only/auth-payment?status=succeeded",
+    `${window.location.origin}/standalone-components/tokenize-only/auth-payment?status=succeeded`,
   failure_url:
-    "http://localhost:3000/standalone-components/tokenize-only/auth-payment?status=failed",
+    `${window.location.origin}/standalone-components/tokenize-only/auth-payment?status=failed`,
 };
 
 (async () => {
@@ -142,8 +142,8 @@ async function processAuthentication(token) {
         shipping_address: requestPayload.shipping.address,
         completion: {
           type: "hosted",
-          success_url: "http://localhost:3000/standalone-components/tokenize-only/auth-payment?authentication-status=succeeded",
-          failure_url: "http://localhost:3000/standalone-components/tokenize-only/auth-payment?authentication-status=failed",
+          success_url: `${window.location.origin}/standalone-components/tokenize-only/auth-payment?authentication-status=succeeded`,
+          failure_url: `${window.location.origin}/standalone-components/tokenize-only/auth-payment?authentication-status=failed`,
         },
       }),
     });
@@ -170,7 +170,7 @@ async function processAuthentication(token) {
   }
 }
 
-async function requestPayment(token, authenticationSessionId) {
+async function processPayment(token, authenticationSessionId) {
   console.log("Payment token:", token);
   
   try {
@@ -237,7 +237,7 @@ const authSessionId = sessionStorage.getItem("authSessionId");
 const storedPaymentToken = sessionStorage.getItem("paymentToken");
 
 if (authenticationStatus === "succeeded" && authSessionId && storedPaymentToken) {
-  requestPayment(storedPaymentToken, authSessionId);
+  processPayment(storedPaymentToken, authSessionId);
   // Clean up stored values
   sessionStorage.removeItem("authSessionId");
   sessionStorage.removeItem("paymentToken");

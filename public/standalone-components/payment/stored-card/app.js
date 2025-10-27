@@ -6,8 +6,8 @@
   const requestPayload = {
     amount: 15000,
     currency: "AED",
-    reference: "ORDER-12345",
-    description: "Payment for order 12345",
+    reference: "ORD-" + Date.now(),
+    description: "Payment",
     items: [
       {
         name: "T-shirt",
@@ -46,9 +46,9 @@
       }
     },
     success_url:
-      "http://localhost:3000/standalone-components/payment/stored-card?status=succeeded",
+      `${window.location.origin}/standalone-components/payment/stored-card?status=succeeded`,
     failure_url:
-      "http://localhost:3000/standalone-components/payment/stored-card?status=failed",
+      `${window.location.origin}/standalone-components/payment/stored-card?status=failed`,
   };
 
   const response = await fetch("/create-payment-session", {

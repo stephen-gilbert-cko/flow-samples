@@ -126,8 +126,8 @@ app.post("/create-payment-session", async (req, res) => {
               country_code: "44",
             },
           },
-          success_url: success_url || "http://localhost:3000?status=succeeded",
-          failure_url: failure_url || "http://localhost:3000?status=failed",
+          success_url: success_url || `http://localhost:${port}?status=succeeded`,
+          failure_url: failure_url || `http://localhost:${port}?status=failed`,
           payment_type: payment_type || "Regular",
           billing_descriptor: billing_descriptor || {
             name: "Checkout.com",
@@ -196,10 +196,67 @@ app.post("/create-payment-session", async (req, res) => {
   }
 });
 
+app.post("/create-instrument", async (req, res) => {
+  try {
+    const { token, billing_address, customer } = req.body;
+
+    // Try to get access token; fallback to secret key
+    const authToken = await getAccessToken() || secretKey;
+
+    if (!authToken) {
+      return res.status(500).json({
+        error: "No authentication credentials provided. Please set ACCESS_KEY_ID + ACCESS_KEY_SECRET or SECRET_KEY in .env file.",
+      });
+    }
+
+    const request = await fetch(
+      "https://api.sandbox.checkout.com/instruments",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          type: "token",
+          token: token,
+          account_holder: {
+            billing_address: billing_address || {
+              address_line1: "123 High St.",
+              address_line2: "Flat 456",
+              city: "London",
+              zip: "SW1A 1AA",
+              country: "GB"
+            },
+          },
+          customer: customer || {
+            email: "john.smith@mail.com",
+            name: "John Smith",
+            phone: {
+              country_code: "44",
+              number: "7987654321"
+            }
+          }
+        }),
+      }
+    );
+
+    const parsedPayload = await request.json();
+
+    res.status(request.status).send(parsedPayload);
+  } catch (error) {
+    console.error("Error creating instrument:", error);
+    res.status(500).json({
+      error: "Internal server error while creating instrument",
+    });
+  }
+});
+
 app.post("/create-authentication-session", async (req, res) => {
   try {
     const {
       token,
+      instrumentId,
       amount,
       currency,
       billing_address,
@@ -220,6 +277,46 @@ app.post("/create-authentication-session", async (req, res) => {
       });
     }
 
+    // Use instrument ID if provided, otherwise fall back to token
+    let source;
+    if (instrumentId) {
+      source = {
+        type: "id",
+        id: instrumentId,
+        billing_address: billing_address || {
+          address_line1: "123 High St.",
+          address_line2: "ABC building",
+          address_line3: "14 Wells Mews",
+          city: "London",
+          zip: "SW1A 1AA",
+          country: "GB",
+        },
+        mobile_phone: mobile_phone || {
+          country_code: "234",
+          number: "0204567895",
+        },
+        email: email || "bruce.wayne@email.com",
+      };
+    } else {
+      source = {
+        type: "token",
+        token: token,
+        billing_address: billing_address || {
+          address_line1: "123 High St.",
+          address_line2: "ABC building",
+          address_line3: "14 Wells Mews",
+          city: "London",
+          zip: "SW1A 1AA",
+          country: "GB",
+        },
+        mobile_phone: mobile_phone || {
+          country_code: "234",
+          number: "0204567895",
+        },
+        email: email || "bruce.wayne@email.com",
+      };
+    }
+
     const request = await fetch(
       "https://api.sandbox.checkout.com/sessions",
       {
@@ -229,30 +326,14 @@ app.post("/create-authentication-session", async (req, res) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          source: {
-            type: "token",
-            token: token,
-            billing_address: billing_address || {
-              address_line1: "123 High St.",
-              address_line2: "ABC building",
-              address_line3: "14 Wells Mews",
-              city: "London",
-              zip: "SW1A 1AA",
-              country: "GB",
-            },
-            mobile_phone: mobile_phone || {
-              country_code: "234",
-              number: "0204567895",
-            },
-            email: email || "bruce.wayne@email.com",
-          },
+          source: source,
           amount: amount || 6540,
           currency: currency || "USD",
           processing_channel_id: requestProcessingChannelId || processingChannelId,
           billing_descriptor: billing_descriptor || {
             name: "Checkout.com",
           },
-          reference: reference || "ORD-5023-4E89",
+          reference: reference || "1234567890",
           shipping_address: shipping_address || {
             address_line1: "123 High St.",
             address_line2: "ABC building",
@@ -262,8 +343,8 @@ app.post("/create-authentication-session", async (req, res) => {
           },
           completion: completion || {
             type: "hosted",
-            success_url: "https://merchant.com/success",
-            failure_url: "https://merchant.com/failure",
+            success_url: success_url || `http://localhost:${port}?authentication-status=succeeded`,
+            failure_url: failure_url || `http://localhost:${port}?authentication-status=failed`,
           },
         }),
       }
@@ -284,6 +365,7 @@ app.post("/create-payment", async (req, res) => {
   try {
     const {
       token,
+      instrumentId,
       authentication_id,
       amount,
       currency,
@@ -313,9 +395,9 @@ app.post("/create-payment", async (req, res) => {
       });
     }
 
-    if (!token) {
+    if (!token && !instrumentId) {
       return res.status(400).json({
-        error: "Token is required",
+        error: "Token or instrumentId is required",
       });
     }
 
@@ -332,6 +414,34 @@ app.post("/create-payment", async (req, res) => {
       };
     }
 
+    // Use instrument ID if provided, otherwise fall back to token
+    let source;
+    if (instrumentId) {
+      source = {
+        type: "id",
+        id: instrumentId,
+        billing_address: sourceBillingAddress || {
+          address_line1: "123 High St.",
+          address_line2: "Flat 456",
+          city: "London",
+          zip: "SW1A 1AA",
+          country: "GB",
+        },
+      };
+    } else {
+      source = {
+        type: "token",
+        token: token,
+        billing_address: sourceBillingAddress || {
+          address_line1: "123 High St.",
+          address_line2: "Flat 456",
+          city: "London",
+          zip: "SW1A 1AA",
+          country: "GB",
+        },
+      };
+    }
+
     const request = await fetch(
       "https://api.sandbox.checkout.com/payments",
       {
@@ -341,17 +451,7 @@ app.post("/create-payment", async (req, res) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          source: {
-            type: "token",
-            token: token,
-            billing_address: sourceBillingAddress || {
-              address_line1: "123 High St.",
-              address_line2: "Flat 456",
-              city: "London",
-              zip: "SW1A 1AA",
-              country: "GB",
-            },
-          },
+          source: source,
           amount: amount || 3000,
           currency: currency || "GBP",
           payment_type: payment_type || "Regular",
@@ -390,8 +490,8 @@ app.post("/create-payment", async (req, res) => {
           } : undefined,
           risk: risk,
           processing_channel_id: requestProcessingChannelId || processingChannelId,
-          success_url: success_url || "http://localhost:3000?status=succeeded",
-          failure_url: failure_url || "http://localhost:3000?status=failed",
+          success_url: success_url || `http://localhost:${port}?status=succeeded`,
+          failure_url: failure_url || `http://localhost:${port}?status=failed`,
           recipient: recipient,
           metadata: metadata,
         }),

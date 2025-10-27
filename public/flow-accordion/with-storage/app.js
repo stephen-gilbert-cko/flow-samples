@@ -6,8 +6,8 @@
   const requestPayload = {
     amount: 15000,
     currency: "AED",
-    reference: "ORDER-12345",
-    description: "Payment for order 12345",
+    reference: "ORD-" + Date.now(),
+    description: "Payment",
     customer: {
       email: "john.smith@mail.com",
       name: "John Smith",
@@ -46,8 +46,8 @@
         store_payment_details: "collect_consent",
       }
     },
-    success_url: "http://localhost:3000/flow-accordion/with-storage?status=succeeded",
-    failure_url: "http://localhost:3000/flow-accordion/with-storage?status=failed",
+    success_url: `${window.location.origin}/flow-accordion/with-storage?status=succeeded`,
+    failure_url: `${window.location.origin}/flow-accordion/with-storage?status=failed`,
   };
 
   const response = await fetch("/create-payment-session", {

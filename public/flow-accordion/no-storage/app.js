@@ -6,8 +6,8 @@
   const requestPayload = {
     amount: 15000,
     currency: "AED",
-    reference: "ORDER-12345",
-    description: "Payment for order 12345",
+    reference: "ORD-" + Date.now(),
+    description: "Payment",
     items: [
       {
         name: "T-shirt",
@@ -42,8 +42,8 @@
         store_payment_details: "disabled",
       }
     },
-    success_url: "http://localhost:3000/flow-accordion/no-storage?status=succeeded",
-    failure_url: "http://localhost:3000/flow-accordion/no-storage?status=failed",
+    success_url: `${window.location.origin}/flow-accordion/no-storage?status=succeeded`,
+    failure_url: `${window.location.origin}/flow-accordion/no-storage?status=failed`,
   };
 
   const response = await fetch("/create-payment-session", {
