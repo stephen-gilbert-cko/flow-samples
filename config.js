@@ -6,4 +6,7 @@ module.exports = {
     accessKeySecret: process.env.ACCESS_KEY_SECRET,
     processingChannelId: process.env.PROCESSING_CHANNEL_ID,
     customerId: process.env.CUSTOMER_ID,
+    adyenApiKey: process.env.ADYEN_API_KEY,
+    adyenMerchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
+    stripeSecretKey: process.env.STRIPE_SECRET_KEY,
 }

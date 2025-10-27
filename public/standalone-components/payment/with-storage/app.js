@@ -46,10 +46,9 @@
         store_payment_details: "collect_consent",
       },
     },
-    success_url:
-      `${window.location.origin}/standalone-components/payment/with-storage?status=succeeded`,
-    failure_url:
-      `${window.location.origin}/standalone-components/payment/with-storage?status=failed`,
+    disabled_payment_methods: ["remember_me"],
+    success_url: `${window.location.origin}/standalone-components/payment/with-storage?status=succeeded`,
+    failure_url: `${window.location.origin}/standalone-components/payment/with-storage?status=failed`,
   };
 
   const response = await fetch("/create-payment-session", {
@@ -67,11 +66,43 @@
   }
 
   // Payment methods to display
-  const componentTypes = ["applepay", "googlepay", "card", "tamara"];
+  const componentTypes = [
+    "applepay",
+    "googlepay",
+    "paypal",
+    "card",
+    "alipay_cn",
+    "alipay_hk",
+    "alma",
+    "bancontact",
+    "benefit",
+    "bizum",
+    "dana",
+    "eps",
+    "gcash",
+    "ideal",
+    "kakaopay",
+    "klarna",
+    "knet",
+    "mbway",
+    "mobilepay",
+    "multibanco",
+    "p24",
+    "plaid",
+    "qpay",
+    "sepa",
+    "stcpay",
+    "tabby",
+    "tamara",
+    "tng",
+    "truemoney",
+    "twint",
+    "vipps",
+  ];
   const readyComponents = new Set();
-  
+
   const hideLoaderWhenAllReady = () => {
-    if (readyComponents.size === componentTypes.length) {      
+    if (readyComponents.size === componentTypes.length) {
       const pageLoader = document.getElementById("page-loader");
       const pageContent = document.getElementById("page-content");
       if (pageLoader) {

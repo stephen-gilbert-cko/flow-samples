@@ -5,21 +5,33 @@
 1. In the project root, create a `.env` file.
 
 2. In [.env](.env):
-   - Set `PUBLIC_KEY` to your Checkout.com public API key (pk_...).
-   - Set `ACCESS_KEY_ID` (ack_...) and `ACCESS_KEY_SECRET` to your Checkout.com access key pair (**recommended**), or `SECRET_KEY` to your Checkout.com secret API key (sk_...).
-   - Set `PROCESSING_CHANNEL_ID` to your Checkout.com processing channel ID (pc_...).
-   - To test stored card flows, set `CUSTOMER_ID` to your Checkout.com customer ID (cus_...).
+   - Set `PUBLIC_KEY` to your Checkout.com Sandbox API public key.
 
-``` dotenv
-PUBLIC_KEY="pk_sbox_..."
-ACCESS_KEY_ID="ack_..."
-ACCESS_KEY_SECRET="..."
-PROCESSING_CHANNEL_ID="pc_..."
-CUSTOMER_ID="cus_..."
-```
+   - Set `ACCESS_KEY_ID` and `ACCESS_KEY_SECRET` to your Checkout.com Sandbox access key pair (**recommended**), or `SECRET_KEY` to your Checkout.com Sandbox API secret key.
 
-> [!WARNING]
-> Some features, such as standalone 3DS authentication, are not supported if using a static `SECRET_KEY`.
+   - Set `PROCESSING_CHANNEL_ID` to your Checkout.com Sandbox processing channel ID.
+
+   ``` dotenv
+   PUBLIC_KEY="pk_sbox_..."
+   ACCESS_KEY_ID="ack_..."
+   ACCESS_KEY_SECRET="..."
+   PROCESSING_CHANNEL_ID="pc_..."
+   ```
+
+   > [!WARNING]
+   > Some features, such as standalone 3DS authentication, are not supported if using a static `SECRET_KEY`.
+
+   ### Optional
+
+   - To test stored card flows, set `CUSTOMER_ID` to your Checkout.com Sandbox customer ID.
+   - To test credential forwarding, set your external provider Sandbox API credentials.
+
+   ``` dotenv
+   CUSTOMER_ID="cus_..."
+   ADYEN_API_KEY="..."
+   ADYEN_MERCHANT_ACCOUNT="..."
+   STRIPE_SECRET_KEY="sk_test_..."
+   ```
 
 3. Build the server:
 

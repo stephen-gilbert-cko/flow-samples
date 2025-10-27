@@ -43,12 +43,11 @@
       },
       stored_card: {
         customer_id: customerId,
-      }
+      },
     },
-    success_url:
-      `${window.location.origin}/standalone-components/payment/stored-card?status=succeeded`,
-    failure_url:
-      `${window.location.origin}/standalone-components/payment/stored-card?status=failed`,
+    disabled_payment_methods: ["remember_me"],
+    success_url: `${window.location.origin}/standalone-components/payment/stored-card?status=succeeded`,
+    failure_url: `${window.location.origin}/standalone-components/payment/stored-card?status=failed`,
   };
 
   const response = await fetch("/create-payment-session", {
@@ -66,11 +65,43 @@
   }
 
   // Payment methods to display
-  const componentTypes = ["applepay", "googlepay", "stored_card", "tamara"];
+  const componentTypes = [
+    "applepay",
+    "googlepay",
+    "paypal",
+    "stored_card",
+    "alipay_cn",
+    "alipay_hk",
+    "alma",
+    "bancontact",
+    "benefit",
+    "bizum",
+    "dana",
+    "eps",
+    "gcash",
+    "ideal",
+    "kakaopay",
+    "klarna",
+    "knet",
+    "mbway",
+    "mobilepay",
+    "multibanco",
+    "p24",
+    "plaid",
+    "qpay",
+    "sepa",
+    "stcpay",
+    "tabby",
+    "tamara",
+    "tng",
+    "truemoney",
+    "twint",
+    "vipps",
+  ];
   const readyComponents = new Set();
-  
+
   const hideLoaderWhenAllReady = () => {
-    if (readyComponents.size === componentTypes.length) {      
+    if (readyComponents.size === componentTypes.length) {
       const pageLoader = document.getElementById("page-loader");
       const pageContent = document.getElementById("page-content");
       if (pageLoader) {

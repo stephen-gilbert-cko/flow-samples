@@ -46,6 +46,7 @@
         store_payment_details: "collect_consent",
       }
     },
+    disabled_payment_methods: ["remember_me"],
     success_url: `${window.location.origin}/flow-accordion/with-storage?status=succeeded`,
     failure_url: `${window.location.origin}/flow-accordion/with-storage?status=failed`,
   };

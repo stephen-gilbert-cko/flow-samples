@@ -45,6 +45,7 @@
         customer_id: customerId,
       },
     },
+    disabled_payment_methods: ["remember_me"],
     success_url: `${window.location.origin}/flow-accordion/stored-card?status=succeeded`,
     failure_url: `${window.location.origin}/flow-accordion/stored-card?status=failed`,
   };

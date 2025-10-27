@@ -1,9 +1,5 @@
 /* global CheckoutWebComponents */
-(async () => {
-  const config = await fetch("/config");
-  const { publicKey } = await config.json();
-
-  const requestPayload = {
+const requestPayload = {
     amount: 3000,
     currency: "GBP",
     billing: {
@@ -15,15 +11,39 @@
         country: "GB",
       },
       phone: {
-        number: "7987654321",
         country_code: "44",
+        number: "7987654321",
       },
     },
-    success_url:
-      `${window.location.origin}/standalone-components/tokenize-only/vault-forward?status=succeeded`,
-    failure_url:
-      `${window.location.origin}/standalone-components/tokenize-only/vault-forward?status=failed`,
+    customer: {
+      email: "john.smith@mail.com",
+      name: "John Smith",
+      phone: {
+        country_code: "44",
+        number: "7987654321",
+      },
+    },
+    shipping: {
+      address: {
+        address_line1: "123 High St.",
+        address_line2: "Flat 456",
+        city: "London",
+        zip: "SW1A 1AA",
+        country: "GB",
+      },
+      phone: {
+        country_code: "44",
+        number: "7987654321",
+      },
+    },
+    disabled_payment_methods: ["remember_me"],
+    success_url: `${window.location.origin}/standalone-components/tokenize-only/vault-forward?status=succeeded`,
+    failure_url: `${window.location.origin}/standalone-components/tokenize-only/vault-forward?status=failed`,
   };
+
+(async () => {
+  const config = await fetch("/config");
+  const { publicKey } = await config.json();
 
   const response = await fetch("/create-payment-session", {
     method: "POST",
@@ -46,7 +66,7 @@
     paymentSession,
     onReady: () => {
       console.log("onReady");
-      
+
       const pageLoader = document.getElementById("page-loader");
       const pageContent = document.getElementById("page-content");
       if (pageLoader) {
@@ -84,14 +104,106 @@
 
   const cardPayButton = document.getElementById("card-pay-button");
   cardPayButton.addEventListener("click", async () => {
-    const { data } = await cardComponent.tokenize();
-    console.log("Card tokenized: ", data);
-    await handleToken(data.token);
+    const response = await cardComponent.tokenize();
+    if (!response?.data) {
+      return;
+    }
+    console.log("Card tokenized: ", response.data);
+    
+    await handleToken(response.data.token);
   });
 })();
 
 async function handleToken(token) {
-  console.log("Token: ", token);
+  const shouldSaveCard = document.getElementById("shouldSaveCard").checked;
+  
+  if (shouldSaveCard) {
+    await forwardCredentials(await createInstrument(token));
+  } else {
+    // If not saving card, proceed to forward the token
+    await forwardCredentials(token);
+  }
+}
+
+async function forwardCredentials(vaultId) {
+  try {    
+    // Determine type based on prefix
+    const isInstrument = vaultId.startsWith('src_');
+    const isToken = vaultId.startsWith('tok_');
+    
+    if (!isToken && !isInstrument) {
+      console.error("Invalid vaultId prefix. Expected 'tok_' or 'src_'", vaultId);
+      triggerToast("failedToast");
+      return null;
+    }
+    
+    // Get selected destination from dropdown
+    const selectedDestination = document.querySelector(".dropdown-item.selected")?.textContent?.trim();
+    console.log(`Forwarding ${isInstrument ? 'instrument' : 'token'} credentials to ${selectedDestination}`);
+    
+    const response = await fetch("/forward-credentials", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        destination: selectedDestination,
+        token: isToken ? vaultId : null,
+        instrumentId: isInstrument ? vaultId : null,
+        amount: requestPayload.amount,
+        currency: requestPayload.currency,
+        reference: `forward_${Date.now()}`,
+      }),
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      console.error("Error forwarding credentials:", result);
+      triggerToast("failedToast");
+      return null;
+    }
+
+    console.log("Forward API response:", result);
+    const responseBody = JSON.parse(result.destination_response.body);
+    console.log(`${selectedDestination} response:`, responseBody);
+    triggerToast("successToast");
+    
+    return result;
+  } catch (error) {
+    console.error("Error forwarding credentials:", error);
+    triggerToast("failedToast");
+    return null;
+  }
+}
+
+async function createInstrument(token) {
+  try {
+    const response = await fetch("/create-instrument", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        token,
+        billing_address: requestPayload.billing.address,
+        customer: requestPayload.customer,
+      }),
+    });
+
+    const instrumentResponse = await response.json();
+
+    if (!response.ok) {
+      console.error("Error creating instrument:", instrumentResponse);
+      return null;
+    }
+
+    console.log("Instrument created:", instrumentResponse);
+    return instrumentResponse.id;
+  } catch (error) {
+    console.error("Error creating instrument:", error);
+    return null;
+  }
 }
 
 function triggerToast(id) {
@@ -120,37 +232,31 @@ if (paymentId) {
 }
 
 // Dropdown selection logic
-document.addEventListener('DOMContentLoaded', function() {
-  const dropdownItems = document.querySelectorAll('.dropdown-item');
-  
-  dropdownItems.forEach(item => {
-    item.addEventListener('click', function() {
+document.addEventListener("DOMContentLoaded", function () {
+  const dropdownItems = document.querySelectorAll(".dropdown-item");
+
+  dropdownItems.forEach((item) => {
+    item.addEventListener("click", function () {
       // Remove selected class from all items
-      dropdownItems.forEach(dropdownItem => {
-        dropdownItem.classList.remove('selected');
+      dropdownItems.forEach((dropdownItem) => {
+        dropdownItem.classList.remove("selected");
       });
-      
+
       // Add selected class to clicked item
-      this.classList.add('selected');
-      
-      // Reorder DOM elements - move selected item to first position
-      const dropdownMenu = document.querySelector('.dropdown-menu');
-      const dropdownArrow = document.querySelector('.dropdown-arrow');
-      
-      // Remove all dropdown items from DOM
-      dropdownItems.forEach(dropdownItem => {
+      this.classList.add("selected");
+
+      // Reorder items - move selected item to top
+      const dropdownMenu = document.querySelector(".dropdown-menu");
+      const dropdownArrow = document.querySelector(".dropdown-arrow");
+      dropdownItems.forEach((dropdownItem) => {
         dropdownItem.remove();
       });
-      
-      // Re-add items in new order (selected first, then others)
       const selectedItem = this;
-      const otherItems = Array.from(dropdownItems).filter(item => item !== selectedItem);
-      
-      // Insert selected item first
+      const otherItems = Array.from(dropdownItems).filter(
+        (item) => item !== selectedItem
+      );
       dropdownMenu.insertBefore(selectedItem, dropdownArrow);
-      
-      // Insert other items after selected item
-      otherItems.forEach(item => {
+      otherItems.forEach((item) => {
         dropdownMenu.insertBefore(item, dropdownArrow);
       });
     });

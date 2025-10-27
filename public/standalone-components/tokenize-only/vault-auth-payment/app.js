@@ -36,6 +36,7 @@ const requestPayload = {
       number: "7987654321",
     },
   },
+  disabled_payment_methods: ["remember_me"],
   success_url:
     `${window.location.origin}/standalone-components/tokenize-only/vault-auth-payment?status=succeeded`,
   failure_url:
@@ -105,10 +106,13 @@ const requestPayload = {
 
   const cardPayButton = document.getElementById("card-pay-button");
   cardPayButton.addEventListener("click", async () => {
-    const { data } = await cardComponent.tokenize();
-    const token = data.token;
-    console.log("Card tokenized:", token);
-    await handleToken(token);
+    const response = await cardComponent.tokenize();
+    if (!response?.data) {
+      return;
+    }
+    console.log("Card tokenized:", response.data);
+    
+    await handleToken(response.data.token);
   });
 })();
 
@@ -187,7 +191,7 @@ async function processAuthentication(instrumentId) {
     
     console.log("Authentication session created:", sessionResponse);
     
-    // Store the session ID for after authentication completes
+    // Store session ID for after authentication completes
     sessionStorage.setItem("authSessionId", sessionResponse.id);
     
     // Redirect to the authentication URL
