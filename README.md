@@ -19,7 +19,7 @@ CUSTOMER_ID="cus_..."
 ```
 
 > [!WARNING]
-> Some features, such as standalone authentication, are not supported if using a static `SECRET_KEY`.
+> Some features, such as standalone 3DS authentication, are not supported if using a static `SECRET_KEY`.
 
 3. Build the server:
 
