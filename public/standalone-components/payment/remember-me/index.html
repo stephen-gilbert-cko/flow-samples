@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Standalone components: with Remember Me</title>
+    <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../../../normalize.css" />
+    <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+    <div id="page-loader" class="loader"></div>
+
+    <div id="page-content" class="page-content hidden">
+        <div class="back-link">
+            <a href="../../../">← flow samples</a>
+        </div>
+
+        <div class="container">
+            <h1>Standalone components: with Remember Me</h1>
+            <p>Remember Me authentication and address + payment method components </p>
+
+            <div id="flow-container"></div>
+
+            <span id="error-message"></span>
+            <span id="successful-payment-message"></span>
+        </div>
+
+        <div id="successToast" class="toast success">
+            <span>The payment was successful</span>
+        </div>
+
+        <div id="failedToast" class="toast failed">
+            <span>The payment failed, try again</span>
+        </div>
+    </div>
+
+    <script src="https://checkout-web-components.checkout.com/index.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>
