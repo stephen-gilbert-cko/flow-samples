@@ -71,6 +71,12 @@ code {
   margin-bottom: 1.5rem;
 }
 
+.payment-method-container.is-mounted:not(.first-mounted, .after-stored) { 
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1.5rem;
+  margin-top: 0.5rem;
+}
+
 .loader {
   height: 60px;
   aspect-ratio: 1;

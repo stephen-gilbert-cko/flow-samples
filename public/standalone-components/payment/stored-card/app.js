@@ -4,37 +4,43 @@
   const { publicKey, customerId } = await config.json();
 
   const requestPayload = {
-    amount: 15000,
-    currency: "AED",
+    amount: 3000,
+    currency: "GBP",
     reference: "ORD-" + Date.now(),
     description: "Payment",
+    customer: {
+      email: "john.smith@mail.com",
+      name: "John Smith",
+    },
     items: [
       {
         name: "T-shirt",
         quantity: 1,
-        unit_price: 15000,
+        reference: "0001",
+        unit_price: 3000,
+        total_amount: 3000,
       },
     ],
     billing: {
       address: {
         address_line1: "123 Main Street",
         address_line2: "Apt 1",
-        city: "Dubai",
+        city: "City",
         zip: "12345",
-        country: "AE",
+        country: "GB",
       },
       phone: {
         number: "7987654321",
-        country_code: "971",
+        country_code: "44",
       },
     },
     shipping: {
       address: {
         address_line1: "123 Main Street",
         address_line2: "Apt 1",
-        city: "Dubai",
+        city: "City",
         zip: "12345",
-        country: "AE",
+        country: "GB",
       },
     },
     payment_method_configuration: {
@@ -58,6 +64,7 @@
     body: JSON.stringify(requestPayload),
   });
   const paymentSession = await response.json();
+  console.log("Payment session created:", paymentSession);
 
   if (!response.ok) {
     console.error("Error creating payment session", paymentSession);
@@ -66,10 +73,10 @@
 
   // Payment methods to display
   const componentTypes = [
+    "stored_card",
     "applepay",
     "googlepay",
     "paypal",
-    "stored_card",
     "alipay_cn",
     "alipay_hk",
     "alma",
@@ -99,6 +106,7 @@
     "vipps",
   ];
   const readyComponents = new Set();
+  let firstMountedElement = null;
 
   const hideLoaderWhenAllReady = () => {
     if (readyComponents.size === componentTypes.length) {
@@ -152,12 +160,25 @@
     const component = checkout.create(type);
     if (await component.isAvailable()) {
       component.mount(container);
+      container.classList.add("is-mounted");
+
+      if (!firstMountedElement) {
+        firstMountedElement = container;
+        container.classList.add("first-mounted");
+      }
     }
     // Mount standard card component if customer has no stored cards
     else if (type === "stored_card") {
       const cardComponent = checkout.create("card");
       if (await cardComponent.isAvailable()) {
         cardComponent.mount(container);
+        container.classList.add("is-mounted");
+
+        // Mark first mounted component
+        if (!firstMountedElement) {
+          firstMountedElement = container;
+          container.classList.add("first-mounted");
+        }
       }
     } else {
       console.log(`"${type}" is not available`);
@@ -167,6 +188,35 @@
   };
 
   await Promise.all(componentTypes.map(createPaymentComponent));
+
+  // Ensure the first mounted container in the DOM gets first-mounted class
+  const firstMountedContainer = Array.from(flowContainer.children).find(
+    (child) => child.classList.contains("is-mounted")
+  );
+  if (
+    firstMountedContainer &&
+    !firstMountedContainer.classList.contains("first-mounted")
+  ) {
+    // Remove first-mounted from any other element
+    document
+      .querySelectorAll(".first-mounted")
+      .forEach((el) => el.classList.remove("first-mounted"));
+    // Add it to the first mounted element
+    firstMountedContainer.classList.add("first-mounted");
+  }
+
+  // Don't add separator below stored_card component
+  const storedCardContainer = document.getElementById("stored_card-container");
+  if (storedCardContainer) {
+    const children = Array.from(flowContainer.children);
+    const storedCardIndex = children.indexOf(storedCardContainer);
+    for (let i = storedCardIndex + 1; i < children.length; i++) {
+      if (children[i].classList.contains("is-mounted")) {
+        children[i].classList.add("after-stored");
+        break;
+      }
+    }
+  }
 })();
 
 function triggerToast(id) {

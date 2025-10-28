@@ -1,45 +1,48 @@
 /* global CheckoutWebComponents */
 const requestPayload = {
-    amount: 3000,
-    currency: "GBP",
-    billing: {
-      address: {
-        address_line1: "123 High St.",
-        address_line2: "Flat 456",
-        city: "London",
-        zip: "SW1A 1AA",
-        country: "GB",
-      },
-      phone: {
-        country_code: "44",
-        number: "7987654321",
-      },
+  amount: 3000,
+  currency: "GBP",
+  reference: "ORD-" + Date.now(),
+  description: "Payment",
+  customer: {
+    email: "john.smith@mail.com",
+    name: "John Smith",
+  },
+  items: [
+    {
+      name: "T-shirt",
+      quantity: 1,
+      reference: "0001",
+      unit_price: 3000,
+      total_amount: 3000,
     },
-    customer: {
-      email: "john.smith@mail.com",
-      name: "John Smith",
-      phone: {
-        country_code: "44",
-        number: "7987654321",
-      },
+  ],
+  billing: {
+    address: {
+      address_line1: "123 Main Street",
+      address_line2: "Apt 1",
+      city: "City",
+      zip: "12345",
+      country: "GB",
     },
-    shipping: {
-      address: {
-        address_line1: "123 High St.",
-        address_line2: "Flat 456",
-        city: "London",
-        zip: "SW1A 1AA",
-        country: "GB",
-      },
-      phone: {
-        country_code: "44",
-        number: "7987654321",
-      },
+    phone: {
+      number: "7987654321",
+      country_code: "44",
     },
-    disabled_payment_methods: ["remember_me"],
-    success_url: `${window.location.origin}/standalone-components/tokenize-only/vault-forward?status=succeeded`,
-    failure_url: `${window.location.origin}/standalone-components/tokenize-only/vault-forward?status=failed`,
-  };
+  },
+  shipping: {
+    address: {
+      address_line1: "123 Main Street",
+      address_line2: "Apt 1",
+      city: "City",
+      zip: "12345",
+      country: "GB",
+    },
+  },
+  disabled_payment_methods: ["remember_me"],
+  success_url: `${window.location.origin}/standalone-components/tokenize-only/vault-forward?status=succeeded`,
+  failure_url: `${window.location.origin}/standalone-components/tokenize-only/vault-forward?status=failed`,
+};
 
 (async () => {
   const config = await fetch("/config");
@@ -53,6 +56,7 @@ const requestPayload = {
     body: JSON.stringify(requestPayload),
   });
   const paymentSession = await response.json();
+  console.log("Payment session created:", paymentSession);
 
   if (!response.ok) {
     console.error("Error creating payment session", paymentSession);
@@ -109,14 +113,14 @@ const requestPayload = {
       return;
     }
     console.log("Card tokenized: ", response.data);
-    
+
     await handleToken(response.data.token);
   });
 })();
 
 async function handleToken(token) {
   const shouldSaveCard = document.getElementById("shouldSaveCard").checked;
-  
+
   if (shouldSaveCard) {
     await forwardCredentials(await createInstrument(token));
   } else {
@@ -126,21 +130,30 @@ async function handleToken(token) {
 }
 
 async function forwardCredentials(vaultId) {
-  try {    
+  try {
     // Determine type based on prefix
-    const isInstrument = vaultId.startsWith('src_');
-    const isToken = vaultId.startsWith('tok_');
-    
+    const isInstrument = vaultId.startsWith("src_");
+    const isToken = vaultId.startsWith("tok_");
+
     if (!isToken && !isInstrument) {
-      console.error("Invalid vaultId prefix. Expected 'tok_' or 'src_'", vaultId);
+      console.error(
+        "Invalid vaultId prefix. Expected 'tok_' or 'src_'",
+        vaultId
+      );
       triggerToast("failedToast");
       return null;
     }
-    
+
     // Get selected destination from dropdown
-    const selectedDestination = document.querySelector(".dropdown-item.selected")?.textContent?.trim();
-    console.log(`Forwarding ${isInstrument ? 'instrument' : 'token'} credentials to ${selectedDestination}`);
-    
+    const selectedDestination = document
+      .querySelector(".dropdown-item.selected")
+      ?.textContent?.trim();
+    console.log(
+      `Forwarding ${
+        isInstrument ? "instrument" : "token"
+      } credentials to ${selectedDestination}`
+    );
+
     const response = await fetch("/forward-credentials", {
       method: "POST",
       headers: {
@@ -168,7 +181,7 @@ async function forwardCredentials(vaultId) {
     const responseBody = JSON.parse(result.destination_response.body);
     console.log(`${selectedDestination} response:`, responseBody);
     triggerToast("successToast");
-    
+
     return result;
   } catch (error) {
     console.error("Error forwarding credentials:", error);

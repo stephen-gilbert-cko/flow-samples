@@ -2,45 +2,46 @@
 const requestPayload = {
   amount: 3000,
   currency: "GBP",
-  billing: {
-    address: {
-      address_line1: "123 High St.",
-      address_line2: "Flat 456",
-      city: "London",
-      zip: "SW1A 1AA",
-      country: "GB",
-    },
-    phone: {
-      country_code: "44",
-      number: "7987654321",
-    },
-  },
+  reference: "ORD-" + Date.now(),
+  description: "Payment",
   customer: {
     email: "john.smith@mail.com",
     name: "John Smith",
+  },
+  items: [
+    {
+      name: "T-shirt",
+      quantity: 1,
+      reference: "0001",
+      unit_price: 3000,
+      total_amount: 3000,
+    },
+  ],
+  billing: {
+    address: {
+      address_line1: "123 Main Street",
+      address_line2: "Apt 1",
+      city: "City",
+      zip: "12345",
+      country: "GB",
+    },
     phone: {
-      country_code: "44",
       number: "7987654321",
+      country_code: "44",
     },
   },
   shipping: {
     address: {
-      address_line1: "123 High St.",
-      address_line2: "Flat 456",
-      city: "London",
-      zip: "SW1A 1AA",
+      address_line1: "123 Main Street",
+      address_line2: "Apt 1",
+      city: "City",
+      zip: "12345",
       country: "GB",
-    },
-    phone: {
-      country_code: "44",
-      number: "7987654321",
     },
   },
   disabled_payment_methods: ["remember_me"],
-  success_url:
-    `${window.location.origin}/standalone-components/tokenize-only/vault-auth-payment?status=succeeded`,
-  failure_url:
-    `${window.location.origin}/standalone-components/tokenize-only/vault-auth-payment?status=failed`,
+  success_url: `${window.location.origin}/standalone-components/tokenize-only/vault-auth-payment?status=succeeded`,
+  failure_url: `${window.location.origin}/standalone-components/tokenize-only/vault-auth-payment?status=failed`,
 };
 
 (async () => {
@@ -55,6 +56,7 @@ const requestPayload = {
     body: JSON.stringify(requestPayload),
   });
   const paymentSession = await response.json();
+  console.log("Payment session created:", paymentSession);
 
   if (!response.ok) {
     console.error("Error creating payment session", paymentSession);
@@ -68,7 +70,7 @@ const requestPayload = {
     paymentSession,
     onReady: () => {
       console.log("onReady");
-      
+
       const pageLoader = document.getElementById("page-loader");
       const pageContent = document.getElementById("page-content");
       if (pageLoader) {
@@ -111,7 +113,7 @@ const requestPayload = {
       return;
     }
     console.log("Card tokenized:", response.data);
-    
+
     await handleToken(response.data.token);
   });
 })();
@@ -130,26 +132,26 @@ async function createInstrument(token) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         token,
         billing_address: requestPayload.billing.address,
         customer: requestPayload.customer,
       }),
     });
-    
+
     const instrumentResponse = await response.json();
-    
+
     if (!response.ok) {
       console.error("Error creating instrument:", instrumentResponse);
       return null;
     }
-    
+
     console.log("Instrument created:", instrumentResponse);
-    
+
     // Extract and store the instrument ID (src_...)
     const instrumentId = instrumentResponse.id;
     sessionStorage.setItem("instrumentId", instrumentId);
-    
+
     return instrumentId;
   } catch (error) {
     console.error("Error creating instrument:", error);
@@ -183,19 +185,23 @@ async function processAuthentication(instrumentId) {
       }),
     });
     const sessionResponse = await response.json();
-    
+
     if (!response.ok) {
       console.error("Error creating authentication session:", sessionResponse);
       return;
     }
-    
+
     console.log("Authentication session created:", sessionResponse);
-    
+
     // Store session ID for after authentication completes
     sessionStorage.setItem("authSessionId", sessionResponse.id);
-    
+
     // Redirect to the authentication URL
-    if (sessionResponse._links && sessionResponse._links.redirect_url && sessionResponse._links.redirect_url.href) {
+    if (
+      sessionResponse._links &&
+      sessionResponse._links.redirect_url &&
+      sessionResponse._links.redirect_url.href
+    ) {
       window.location.href = sessionResponse._links.redirect_url.href;
     } else {
       console.error("No redirect URL returned from authentication session");
@@ -205,7 +211,7 @@ async function processAuthentication(instrumentId) {
   }
 }
 
-async function processPayment(instrumentId, authenticationSessionId) {  
+async function processPayment(instrumentId, authenticationSessionId) {
   try {
     const response = await fetch("/create-payment", {
       method: "POST",
@@ -226,15 +232,15 @@ async function processPayment(instrumentId, authenticationSessionId) {
         failure_url: requestPayload.failure_url,
       }),
     });
-    
+
     const paymentResponse = await response.json();
-    
+
     if (!response.ok) {
       console.error("Error creating payment:", paymentResponse);
       triggerToast("failedToast");
       return;
     }
-    
+
     if (paymentResponse.approved === true) {
       console.log("Payment successful:", paymentResponse);
       triggerToast("successToast");
@@ -265,7 +271,11 @@ const authenticationStatus = urlParams.get("authentication-status");
 const authSessionId = sessionStorage.getItem("authSessionId");
 const storedInstrumentId = sessionStorage.getItem("instrumentId");
 
-if (authenticationStatus === "succeeded" && authSessionId && storedInstrumentId) {
+if (
+  authenticationStatus === "succeeded" &&
+  authSessionId &&
+  storedInstrumentId
+) {
   processPayment(storedInstrumentId, authSessionId);
   // Clean up stored values
   sessionStorage.removeItem("authSessionId");

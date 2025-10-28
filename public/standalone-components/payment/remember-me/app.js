@@ -4,40 +4,43 @@
   const { publicKey } = await config.json();
 
   const requestPayload = {
-    amount: 15000,
-    currency: "AED",
+    amount: 3000,
+    currency: "GBP",
     reference: "ORD-" + Date.now(),
     description: "Payment",
-    customer:{
+    customer: {
       email: "returning.user@checkout.com",
+      name: "Returning User",
     },
     items: [
       {
         name: "T-shirt",
         quantity: 1,
-        unit_price: 15000,
+        reference: "0001",
+        unit_price: 3000,
+        total_amount: 3000,
       },
     ],
     billing: {
       address: {
         address_line1: "123 Main Street",
         address_line2: "Apt 1",
-        city: "Dubai",
+        city: "City",
         zip: "12345",
-        country: "AE",
+        country: "GB",
       },
       phone: {
         number: "7987654321",
-        country_code: "971",
+        country_code: "44",
       },
     },
     shipping: {
       address: {
         address_line1: "123 Main Street",
         address_line2: "Apt 1",
-        city: "Dubai",
+        city: "City",
         zip: "12345",
-        country: "AE",
+        country: "GB",
       },
     },
     payment_method_configuration: {
@@ -57,6 +60,7 @@
     body: JSON.stringify(requestPayload),
   });
   const paymentSession = await response.json();
+  console.log("Payment session created:", paymentSession);
 
   if (!response.ok) {
     console.error("Error creating payment session", paymentSession);
@@ -100,6 +104,7 @@
     "vipps",
   ];
   const readyComponents = new Set();
+  let firstMountedElement = null;
 
   const hideLoaderWhenAllReady = () => {
     if (readyComponents.size === componentTypes.length) {
@@ -148,11 +153,23 @@
     const container = document.createElement("div");
     container.id = `${type}-container`;
     container.className = "payment-method-container";
+    
+    // Mark Remember Me components as a grouped set
+    if (["authentication", "shipping_address", "card"].includes(type)) {
+      container.classList.add("rm-components");
+    }
+    
     flowContainer.appendChild(container);
 
     const component = checkout.create(type);
     if (await component.isAvailable()) {
       component.mount(container);
+      container.classList.add("is-mounted");
+      
+      if (!firstMountedElement) {
+        firstMountedElement = container;
+        container.classList.add("first-mounted");
+      }
     } else {
       console.log(`"${type}" is not available`);
       readyComponents.add(type); // Mark as "ready" to avoid blocking the loader

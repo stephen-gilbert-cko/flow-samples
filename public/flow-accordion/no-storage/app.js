@@ -2,45 +2,51 @@
 (async () => {
   const config = await fetch("/config");
   const { publicKey } = await config.json();
-  
+
   const requestPayload = {
-    amount: 15000,
-    currency: "AED",
+    amount: 3000,
+    currency: "GBP",
     reference: "ORD-" + Date.now(),
     description: "Payment",
+    customer: {
+      email: "john.smith@mail.com",
+      name: "John Smith",
+    },
     items: [
       {
         name: "T-shirt",
         quantity: 1,
-        unit_price: 15000,
+        reference: "0001",
+        unit_price: 3000,
+        total_amount: 3000,
       },
     ],
     billing: {
       address: {
         address_line1: "123 Main Street",
         address_line2: "Apt 1",
-        city: "Dubai",
+        city: "City",
         zip: "12345",
-        country: "AE",
+        country: "GB",
       },
       phone: {
         number: "7987654321",
-        country_code: "971",
+        country_code: "44",
       },
     },
     shipping: {
       address: {
         address_line1: "123 Main Street",
         address_line2: "Apt 1",
-        city: "Dubai",
+        city: "City",
         zip: "12345",
-        country: "AE",
+        country: "GB",
       },
     },
     payment_method_configuration: {
       card: {
         store_payment_details: "disabled",
-      }
+      },
     },
     disabled_payment_methods: ["remember_me"],
     success_url: `${window.location.origin}/flow-accordion/no-storage?status=succeeded`,
@@ -55,6 +61,7 @@
     body: JSON.stringify(requestPayload),
   });
   const paymentSession = await response.json();
+  console.log("Payment session created:", paymentSession);
 
   if (!response.ok) {
     console.error("Error creating payment session", paymentSession);
@@ -68,7 +75,7 @@
     paymentSession,
     onReady: () => {
       console.log("onReady");
-      
+
       const pageLoader = document.getElementById("page-loader");
       const pageContent = document.getElementById("page-content");
       if (pageLoader) {
@@ -98,7 +105,7 @@
 
   const flowContainer = document.getElementById("flow-container");
   const flowComponent = checkout.create("flow");
-  
+
   if (await flowComponent.isAvailable()) {
     flowComponent.mount(flowContainer);
   }

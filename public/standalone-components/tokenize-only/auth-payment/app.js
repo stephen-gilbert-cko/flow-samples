@@ -2,45 +2,46 @@
 const requestPayload = {
   amount: 3000,
   currency: "GBP",
-  billing: {
-    address: {
-      address_line1: "123 High St.",
-      address_line2: "Flat 456",
-      city: "London",
-      zip: "SW1A 1AA",
-      country: "GB",
-    },
-    phone: {
-      country_code: "44",
-      number: "7987654321",
-    },
-  },
+  reference: "ORD-" + Date.now(),
+  description: "Payment",
   customer: {
     email: "john.smith@mail.com",
     name: "John Smith",
+  },
+  items: [
+    {
+      name: "T-shirt",
+      quantity: 1,
+      reference: "0001",
+      unit_price: 3000,
+      total_amount: 3000,
+    },
+  ],
+  billing: {
+    address: {
+      address_line1: "123 Main Street",
+      address_line2: "Apt 1",
+      city: "City",
+      zip: "12345",
+      country: "GB",
+    },
     phone: {
-      country_code: "44",
       number: "7987654321",
+      country_code: "44",
     },
   },
   shipping: {
     address: {
-      address_line1: "123 High St.",
-      address_line2: "Flat 456",
-      city: "London",
-      zip: "SW1A 1AA",
+      address_line1: "123 Main Street",
+      address_line2: "Apt 1",
+      city: "City",
+      zip: "12345",
       country: "GB",
-    },
-    phone: {
-      country_code: "44",
-      number: "7987654321",
     },
   },
   disabled_payment_methods: ["remember_me"],
-  success_url:
-    `${window.location.origin}/standalone-components/tokenize-only/auth-payment?status=succeeded`,
-  failure_url:
-    `${window.location.origin}/standalone-components/tokenize-only/auth-payment?status=failed`,
+  success_url: `${window.location.origin}/standalone-components/tokenize-only/auth-payment?status=succeeded`,
+  failure_url: `${window.location.origin}/standalone-components/tokenize-only/auth-payment?status=failed`,
 };
 
 (async () => {
@@ -55,6 +56,7 @@ const requestPayload = {
     body: JSON.stringify(requestPayload),
   });
   const paymentSession = await response.json();
+  console.log("Payment session created:", paymentSession);
 
   if (!response.ok) {
     console.error("Error creating payment session", paymentSession);
@@ -68,7 +70,7 @@ const requestPayload = {
     paymentSession,
     onReady: () => {
       console.log("onReady");
-      
+
       const pageLoader = document.getElementById("page-loader");
       const pageContent = document.getElementById("page-content");
       if (pageLoader) {
@@ -111,21 +113,24 @@ const requestPayload = {
       return;
     }
     console.log("Card tokenized:", authTokenResponse.data);
-    
+
     const paymentTokenResponse = await cardComponent.tokenize();
     if (!paymentTokenResponse?.data) {
       return;
     }
     console.log("Card tokenized:", paymentTokenResponse.data);
 
-    await handleTokens(authTokenResponse.data.token, paymentTokenResponse.data.token);
+    await handleTokens(
+      authTokenResponse.data.token,
+      paymentTokenResponse.data.token
+    );
   });
 })();
 
 async function handleTokens(authToken, paymentToken) {
   // Store payment token for after authentication completes
   sessionStorage.setItem("paymentToken", paymentToken);
-  
+
   await processAuthentication(authToken);
 }
 
@@ -156,19 +161,23 @@ async function processAuthentication(token) {
       }),
     });
     const sessionResponse = await response.json();
-    
+
     if (!response.ok) {
       console.error("Error creating authentication session:", sessionResponse);
       return;
     }
-    
+
     console.log("Authentication session created:", sessionResponse);
-    
+
     // Store session ID for after authentication completes
     sessionStorage.setItem("authSessionId", sessionResponse.id);
-    
+
     // Redirect to the authentication URL
-    if (sessionResponse._links && sessionResponse._links.redirect_url && sessionResponse._links.redirect_url.href) {
+    if (
+      sessionResponse._links &&
+      sessionResponse._links.redirect_url &&
+      sessionResponse._links.redirect_url.href
+    ) {
       window.location.href = sessionResponse._links.redirect_url.href;
     } else {
       console.error("No redirect URL returned from authentication session");
@@ -180,7 +189,7 @@ async function processAuthentication(token) {
 
 async function processPayment(token, authenticationSessionId) {
   console.log("Payment token:", token);
-  
+
   try {
     const response = await fetch("/create-payment", {
       method: "POST",
@@ -205,15 +214,15 @@ async function processPayment(token, authenticationSessionId) {
         failure_url: requestPayload.failure_url,
       }),
     });
-    
+
     const paymentResponse = await response.json();
-    
+
     if (!response.ok) {
       console.error("Error creating payment:", paymentResponse);
       triggerToast("failedToast");
       return;
     }
-    
+
     if (paymentResponse.approved === true) {
       console.log("Payment successful:", paymentResponse);
       triggerToast("successToast");
@@ -244,7 +253,11 @@ const authenticationStatus = urlParams.get("authentication-status");
 const authSessionId = sessionStorage.getItem("authSessionId");
 const storedPaymentToken = sessionStorage.getItem("paymentToken");
 
-if (authenticationStatus === "succeeded" && authSessionId && storedPaymentToken) {
+if (
+  authenticationStatus === "succeeded" &&
+  authSessionId &&
+  storedPaymentToken
+) {
   processPayment(storedPaymentToken, authSessionId);
   // Clean up stored values
   sessionStorage.removeItem("authSessionId");

@@ -178,13 +178,7 @@ app.post("/create-payment-session", async (req, res) => {
           instruction: instruction,
           processing_channel_id: processing_channel_id || processingChannelId,
           payment_method_configuration: payment_method_configuration,
-          items: items || [
-            {
-              name: "T-shirt",
-              quantity: 1,
-              unit_price: 3000,
-            },
-          ],
+          items: items,
           amount_allocations: amount_allocations,
           risk: risk,
           display_name: display_name,

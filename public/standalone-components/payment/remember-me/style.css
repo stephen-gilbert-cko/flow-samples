@@ -71,6 +71,25 @@ code {
   margin-bottom: 1.5rem;
 }
 
+/* Don't show separator between Remember Me components */
+.payment-method-container.rm-components.is-mounted + .payment-method-container.rm-components.is-mounted {
+  border-top: none !important;
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+.payment-method-container.rm-components.is-mounted ~ .payment-method-container.is-mounted:not(.rm-components):first-of-type {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.payment-method-container.is-mounted:not(.rm-components):not(.first-mounted) {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1.5rem;
+  margin-top: 0.5rem;
+}
+
 .loader {
   height: 60px;
   aspect-ratio: 1;
