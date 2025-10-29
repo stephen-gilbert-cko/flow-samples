@@ -47,8 +47,110 @@
                 padding: 0.5rem;
                 text-indent: 8rem hanging each-line;
             }
+
+            .friend {
+                display: none;
+            }
+        }
+
+        .friend {
+            position: fixed;
+            bottom: 20px;
+            right: -60px;
+            width: 80px;
+            height: 80px;
+            cursor: pointer;
+            transition: right 0.4s ease-out;
+            z-index: 1000;
+        }
+
+        .friend.visible {
+            right: 20px;
+            animation: bob 3s ease-in-out infinite;
+        }
+
+        .friend svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .speech-bubble {
+            position: absolute;
+            bottom: 80%;
+            right: 0;
+            padding: 10px 15px 10px 30px;
+            background: #000;
+            color: #fff;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .friend.visible:hover .speech-bubble {
+            opacity: 1;
+        }
+
+        .speech-bubble::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            right: 20px;
+            border: 8px solid transparent;
+            border-top-color: #000;
+        }
+
+        @keyframes bob {
+            0% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+
+            20% {
+                transform: translateY(-10px) translateX(-4px) rotate(-10deg);
+            }
+
+            30% {
+                transform: translateY(-10px) translateX(-4px) rotate(-10deg);
+            }
+
+            50% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
+
+            70% {
+                transform: translateY(-10px) translateX(4px) rotate(10deg);
+            }
+
+            80% {
+                transform: translateY(-10px) translateX(4px) rotate(10deg);
+            }
+
+            100% {
+                transform: translateY(0) translateX(0) rotate(0deg);
+            }
         }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const assistant = document.querySelector('.friend');
+            function revealAssistant() {
+                if (!assistant.classList.contains('visible')) {
+                    assistant.classList.add('visible');
+                }
+            }
+            assistant.addEventListener('mouseenter', function () {
+                revealAssistant();
+                console.group('%c🐱', 'font-size: 1.5rem;');
+                console.log('%cMeow! You found me 🔍', 'font-size: 0.85rem;');
+                console.log('%cSince you\'re here, I\'ll offer a tip...', 'font-size: 0.9rem; color: #CCA136;');
+                console.log('%c💡 Keep the console open while exploring samples to see event and API logs', 'font-size: 1rem; font-weight: bold; color: #186aff; background-color: #F4F2F2; padding: 0.25rem;');
+                console.groupEnd();
+            }, { once: true });
+        });
+    </script>
 </head>
 
 <body>
@@ -80,6 +182,22 @@
 │
 └──<span class="docs-icon"> 📖 </span><a href="https://www.checkout.com/docs/payments/accept-payments/accept-a-payment-on-your-website" target="_blank">docs</a>
     </pre>
+
+    <div class="friend">
+        <div class="speech-bubble">Open your browser console</div>
+        <svg viewBox="0 0 111 111" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g clip-path="url(#clip0_6054_338)">
+                <path
+                    d="M65.7703 56.5082C65.3744 55.7147 65.3522 55.1972 65.7703 54.3548L82.3354 26.0284C83.1637 24.5375 82.1698 22.384 80.182 22.384H43.4073C42.5791 22.384 41.8764 22.7903 41.4195 23.5436L22.8666 54.1891C22.4238 54.947 22.44 55.918 22.8666 56.6739L41.4195 87.3194C41.8278 88.0746 42.5076 88.479 43.4073 88.479H80.182C82.0041 88.479 83.1637 86.4912 82.3354 84.8346L65.7703 56.5082ZM73.8872 28.6788L61.7947 49.3852L49.7021 28.6788H73.8872ZM29.4926 55.68L43.7386 31.8262L57.6534 55.68L43.7386 79.5338L29.4926 55.68ZM49.8677 82.6812L61.9603 61.9747L74.0529 82.6812H49.8677Z"
+                    fill="#000000" />
+            </g>
+            <defs>
+                <clipPath id="clip0_6054_338">
+                    <rect fill="#000000" height="111" width="111" />
+                </clipPath>
+            </defs>
+        </svg>
+    </div>
 </body>
 
 </html>

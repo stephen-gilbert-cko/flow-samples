@@ -77,6 +77,10 @@ code {
   margin-top: 0.5rem;
 }
 
+.after-stored {
+  padding-top: 1rem;
+}
+
 .loader {
   height: 60px;
   aspect-ratio: 1;
