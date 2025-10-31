@@ -343,17 +343,16 @@ app.post("/create-authentication-session", async (req, res) => {
         id: instrumentId,
         billing_address: billing_address || {
           address_line1: "123 High St.",
-          address_line2: "ABC building",
-          address_line3: "14 Wells Mews",
+          address_line2: "Flat 456",
           city: "London",
           zip: "SW1A 1AA",
           country: "GB",
         },
         mobile_phone: mobile_phone || {
-          country_code: "234",
-          number: "0204567895",
+          country_code: "44",
+          number: "7987654321",
         },
-        email: email || "bruce.wayne@email.com",
+        email: email || "john.smith@mail.com",
       };
     } else {
       source = {
@@ -361,17 +360,16 @@ app.post("/create-authentication-session", async (req, res) => {
         token: token,
         billing_address: billing_address || {
           address_line1: "123 High St.",
-          address_line2: "ABC building",
-          address_line3: "14 Wells Mews",
+          address_line2: "Flat 456",
           city: "London",
           zip: "SW1A 1AA",
           country: "GB",
         },
         mobile_phone: mobile_phone || {
-          country_code: "234",
-          number: "0204567895",
+          country_code: "44",
+          number: "7987654321",
         },
-        email: email || "bruce.wayne@email.com",
+        email: email || "john.smith@mail.com",
       };
     }
 
@@ -383,17 +381,18 @@ app.post("/create-authentication-session", async (req, res) => {
       },
       body: JSON.stringify({
         source: source,
-        amount: amount || 6540,
-        currency: currency || "USD",
+        amount: amount || 3000,
+        currency: currency || "GBP",
         processing_channel_id:
           requestProcessingChannelId || processingChannelId,
         billing_descriptor: billing_descriptor || {
           name: "Checkout.com",
+          city: "London",
         },
         reference: reference || "1234567890",
         shipping_address: shipping_address || {
           address_line1: "123 High St.",
-          address_line2: "ABC building",
+          address_line2: "Flat 456",
           city: "London",
           zip: "SW1A 1AA",
           country: "GB",
@@ -414,9 +413,9 @@ app.post("/create-authentication-session", async (req, res) => {
 
     res.status(request.status).send(parsedPayload);
   } catch (error) {
-    console.error("Error creating session:", error);
+    console.error("Error creating authentication session:", error);
     res.status(500).json({
-      error: "Internal server error while creating session",
+      error: "Internal server error while creating authentication session",
     });
   }
 });
@@ -456,11 +455,11 @@ app.get("/get-authentication-details", async (req, res) => {
       return res.status(request.status).json(parsedPayload);
     }
 
-    // Extract the relevant authentication details
     const authDetails = {
       protocol_version: parsedPayload.protocol_version,
       eci: parsedPayload.eci,
       cryptogram: parsedPayload.cryptogram,
+      xid: parsedPayload.xid,
       acs_reference_number: parsedPayload.acs?.reference_number,
       ds_reference_number: parsedPayload.ds?.reference_number,
     };
@@ -640,7 +639,7 @@ const DESTINATION_CONFIGS = {
         ).toString("base64")}`,
       },
     },
-    body: `amount=3000&currency=gbp&payment_method_data[type]=card&payment_method_data[card][number]={{card_number}}&payment_method_data[card][exp_month]={{card_expiry_month}}&payment_method_data[card][exp_year]={{card_expiry_year_yyyy}}&payment_method_data[card][cvc]={{card_cvv}}`,
+    body: `amount=3000&currency=gbp&payment_method_types[]=card&payment_method_data[type]=card&payment_method_data[card][number]={{card_number}}&payment_method_data[card][exp_month]={{card_expiry_month}}&payment_method_data[card][exp_year]={{card_expiry_year_yyyy}}&payment_method_data[card][cvc]={{card_cvv}}&confirm=true&error_on_requires_action=true`,
   },
   "Global Payments": {
     url: "https://apis.sandbox.globalpay.com/ucp/transactions",
@@ -750,6 +749,27 @@ app.post("/forward-credentials", async (req, res) => {
           /currency=\w+/,
           `currency=${(currency || "gbp").toLowerCase()}`
         );
+      
+      // Add authentication details if provided
+      if (authDetails) {
+        const authParams = [];
+        if (authDetails.protocol_version) {
+          authParams.push(`payment_method_options[card][three_d_secure][version]=${encodeURIComponent(authDetails.protocol_version)}`);
+        }
+        if (authDetails.eci) {
+          authParams.push(`payment_method_options[card][three_d_secure][electronic_commerce_indicator]=${encodeURIComponent(authDetails.eci)}`);
+        }
+        if (authDetails.cryptogram) {
+          authParams.push(`payment_method_options[card][three_d_secure][cryptogram]=${encodeURIComponent(authDetails.cryptogram)}`);
+        }
+        if (authDetails.xid) {
+          authParams.push(`payment_method_options[card][three_d_secure][transaction_id]=${encodeURIComponent(authDetails.xid)}`);
+        }
+        
+        if (authParams.length > 0) {
+          destinationBody += "&" + authParams.join("&");
+        }
+      }
     } else if (destination === "Global Payments") {
       // Get Global Payments access token
       let globalPaymentsAuthToken;
