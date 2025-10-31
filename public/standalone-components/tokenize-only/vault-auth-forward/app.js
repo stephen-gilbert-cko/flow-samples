@@ -369,7 +369,7 @@ async function handleAuthenticatedForward(
     );
     if (authDetailsResponse.ok) {
       authDetails = await authDetailsResponse.json();
-      console.log("Authentication details:", authDetails);
+      console.log("Authentication completed:", authDetails);
     } else {
       console.warn(
         "Failed to retrieve authentication details, proceeding without them"
@@ -410,12 +410,12 @@ if (paymentId) {
   console.log("Create Payment with PaymentId: ", paymentId);
 }
 
-// Dropdown selection logic with state persistence
+// Dropdown selection logic
 document.addEventListener("DOMContentLoaded", function () {
   const dropdownItems = document.querySelectorAll(".dropdown-item");
   const storageKey = "vault-auth-forward-destination";
 
-  // Restore saved selection if available (either from sessionStorage or saved before auth redirect)
+  // Restore saved selection if available
   const savedDestination = sessionStorage.getItem(storageKey);
   if (savedDestination) {
     const itemToSelect = Array.from(dropdownItems).find(

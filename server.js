@@ -775,15 +775,12 @@ app.post("/forward-credentials", async (req, res) => {
       
       // Add authentication details if provided
       if (authDetails) {
-        // Ensure payment_method.authentication exists
         if (!gpBody.payment_method) {
           gpBody.payment_method = {};
         }
         if (!gpBody.payment_method.authentication) {
           gpBody.payment_method.authentication = {};
         }
-        
-        // Add three_ds authentication details
         gpBody.payment_method.authentication.three_ds = {
           message_version: authDetails.protocol_version,
           eci: authDetails.eci,

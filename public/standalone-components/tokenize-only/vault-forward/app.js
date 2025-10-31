@@ -263,7 +263,7 @@ if (paymentId) {
   console.log("Create Payment with PaymentId: ", paymentId);
 }
 
-// Dropdown selection logic with state persistence
+// Dropdown selection logic
 document.addEventListener("DOMContentLoaded", function () {
   const dropdownItems = document.querySelectorAll(".dropdown-item");
   const storageKey = "vault-forward-destination";
