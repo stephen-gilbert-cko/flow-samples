@@ -421,6 +421,59 @@ app.post("/create-authentication-session", async (req, res) => {
   }
 });
 
+app.get("/get-authentication-details", async (req, res) => {
+  try {
+    const { authSessionId } = req.query;
+
+    if (!authSessionId) {
+      return res.status(400).json({
+        error: "authSessionId query parameter is required",
+      });
+    }
+
+    const accessToken = await getAccessToken();
+    if (!accessToken) {
+      return res.status(500).json({
+        error:
+          "Access key credentials required. Please set ACCESS_KEY_ID + ACCESS_KEY_SECRET in .env file.",
+      });
+    }
+
+    const request = await fetch(
+      `https://api.sandbox.checkout.com/sessions/${authSessionId}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const parsedPayload = await request.json();
+
+    if (!request.ok) {
+      return res.status(request.status).json(parsedPayload);
+    }
+
+    // Extract the relevant authentication details
+    const authDetails = {
+      protocol_version: parsedPayload.protocol_version,
+      eci: parsedPayload.eci,
+      cryptogram: parsedPayload.cryptogram,
+      acs_reference_number: parsedPayload.acs?.reference_number,
+      ds_reference_number: parsedPayload.ds?.reference_number,
+    };
+
+    res.status(request.status).json(authDetails);
+  } catch (error) {
+    console.error("Error getting authentication details:", error);
+    res.status(500).json({
+      error: "Internal server error while getting authentication details",
+    });
+  }
+});
+
 app.post("/create-payment", async (req, res) => {
   try {
     const {
@@ -606,7 +659,7 @@ const DESTINATION_CONFIGS = {
 
 app.post("/forward-credentials", async (req, res) => {
   try {
-    const { destination, token, instrumentId, amount, currency, reference } =
+    const { destination, token, instrumentId, amount, currency, reference, authDetails } =
       req.body;
 
     // Try to get access token; fallback to secret key
@@ -719,6 +772,27 @@ app.post("/forward-credentials", async (req, res) => {
       if (reference) {
         gpBody.reference = reference;
       }
+      
+      // Add authentication details if provided
+      if (authDetails) {
+        // Ensure payment_method.authentication exists
+        if (!gpBody.payment_method) {
+          gpBody.payment_method = {};
+        }
+        if (!gpBody.payment_method.authentication) {
+          gpBody.payment_method.authentication = {};
+        }
+        
+        // Add three_ds authentication details
+        gpBody.payment_method.authentication.three_ds = {
+          message_version: authDetails.protocol_version,
+          eci: authDetails.eci,
+          value: authDetails.cryptogram,
+          server_trans_ref: authDetails.acs_reference_number,
+          ds_trans_ref: authDetails.ds_reference_number,
+        };
+      }
+      
       destinationBody = JSON.stringify(gpBody);
     }
 

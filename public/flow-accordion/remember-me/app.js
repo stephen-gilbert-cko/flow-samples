@@ -67,6 +67,9 @@
     return;
   }
 
+  // Track previous isValid state for each component
+  const componentValidityState = new Map();
+
   const checkout = await CheckoutWebComponents({
     publicKey: publicKey,
     environment: "sandbox",
@@ -91,11 +94,27 @@
       console.log("Payment completed: ", paymentResponse.id);
     },
     onChange: (component) => {
-      console.log(
-        `onChange() -> isValid: "${component.isValid()}" for "${
-          component.type
-        }"`
-      );
+      const currentIsValid = component.isValid();
+      const previousIsValid = componentValidityState.get(component.type);
+      
+      // Only log if validity state has changed
+      if (previousIsValid !== currentIsValid) {
+        console.log(
+          `onChange() -> isValid: "${currentIsValid}" for "${
+            component.type
+          }"`
+        );
+        componentValidityState.set(component.type, currentIsValid);
+      }
+    },
+    onCardBinChanged: (_self, cardMetadata) => {
+      console.log("onCardBinChanged:", cardMetadata);
+    },
+    onSubmit: (component) => {
+      console.log(`onSubmit for "${component.type}"`);
+    },
+    onAuthorized: (_self, authorizeResult) => {
+      console.log("onAuthorized:", authorizeResult);
     },
     onError: (component, error) => {
       console.log("onError", error, "Component", component.type);
