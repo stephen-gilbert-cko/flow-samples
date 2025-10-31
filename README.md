@@ -12,6 +12,7 @@
    - Set `PROCESSING_CHANNEL_ID` to your Checkout.com Sandbox processing channel ID.
 
    ``` dotenv
+   # Checkout.com
    PUBLIC_KEY="pk_sbox_..."
    ACCESS_KEY_ID="ack_..."
    ACCESS_KEY_SECRET="..."
@@ -19,7 +20,7 @@
    ```
 
 > [!WARNING]
-> Some features, such as standalone 3DS authentication, are not supported if using a static `SECRET_KEY`.
+> Some features, such as standalone 3DS authentication, are not supported when using a static `SECRET_KEY`.
 
    ### Optional
 
@@ -27,10 +28,18 @@
    - To test credential forwarding, set your external provider Sandbox API credentials.
 
    ``` dotenv
+   # Stored card payments
    CUSTOMER_ID="cus_..."
+   
+   # ------ Forward destinations ------
+   # Stripe
+   STRIPE_SECRET_KEY="sk_test_..."
+   # Adyen
    ADYEN_API_KEY="..."
    ADYEN_MERCHANT_ACCOUNT="..."
-   STRIPE_SECRET_KEY="sk_test_..."
+   # Global Payments
+   GLOBAL_PAYMENTS_APP_ID="..."
+   GLOBAL_PAYMENTS_APP_KEY="..."
    ```
 
 3. Build the server:

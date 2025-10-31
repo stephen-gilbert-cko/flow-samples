@@ -9,4 +9,6 @@ module.exports = {
     adyenApiKey: process.env.ADYEN_API_KEY,
     adyenMerchantAccount: process.env.ADYEN_MERCHANT_ACCOUNT,
     stripeSecretKey: process.env.STRIPE_SECRET_KEY,
+    globalPaymentsAppId: process.env.GLOBAL_PAYMENTS_APP_ID,
+    globalPaymentsAppKey: process.env.GLOBAL_PAYMENTS_APP_KEY,
 }

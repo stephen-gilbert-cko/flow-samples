@@ -1,5 +1,6 @@
 const fetch = require("node-fetch");
 const express = require("express");
+const CryptoJS = require("crypto-js");
 const app = express();
 app.use(express.static("public"));
 app.use(express.json());
@@ -13,6 +14,8 @@ const {
   adyenApiKey,
   adyenMerchantAccount,
   stripeSecretKey,
+  globalPaymentsAppId,
+  globalPaymentsAppKey,
 } = require("./config");
 const port = process.env.PORT || 3000;
 
@@ -63,6 +66,50 @@ async function getAccessToken() {
     return accessToken;
   } catch (error) {
     console.error("Error getting access token:", error);
+    throw error;
+  }
+}
+
+async function getGlobalPaymentsAccessToken() {
+  if (!globalPaymentsAppId || !globalPaymentsAppKey) {
+    throw new Error(
+      "GLOBAL_PAYMENTS_APP_ID and GLOBAL_PAYMENTS_APP_KEY required in .env file."
+    );
+  }
+
+  const nonce = new Date().toISOString();
+  const secret = CryptoJS.SHA512(nonce + "" + globalPaymentsAppKey).toString(
+    CryptoJS.enc.Hex
+  );
+
+  try {
+    const response = await fetch(
+      "https://apis.sandbox.globalpay.com/ucp/accesstoken",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-GP-Version": "2021-03-22",
+        },
+        body: JSON.stringify({
+          app_id: globalPaymentsAppId,
+          secret: secret,
+          grant_type: "client_credentials",
+          nonce: nonce,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to get Global Payments access token: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const data = await response.json();
+    return data.token
+  } catch (error) {
+    console.error("Error getting Global Payments access token:", error);
     throw error;
   }
 }
@@ -542,6 +589,19 @@ const DESTINATION_CONFIGS = {
     },
     body: `amount=3000&currency=gbp&payment_method_data[type]=card&payment_method_data[card][number]={{card_number}}&payment_method_data[card][exp_month]={{card_expiry_month}}&payment_method_data[card][exp_year]={{card_expiry_year_yyyy}}&payment_method_data[card][cvc]={{card_cvv}}`,
   },
+  "Global Payments": {
+    url: "https://apis.sandbox.globalpay.com/ucp/transactions",
+    method: "POST",
+    headers: {
+      raw: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        "X-GP-Version": "2021-03-22",
+        "Accept-Encoding": "identity"
+      },
+    },
+    body: `{"account_name":"transaction_processing","channel":"CP","type":"SALE","capture_mode":"AUTO","amount":"3000","currency":"GBP","reference":"21450331","country":"GB","payment_method":{"first_name":"Jane","last_name":"Doe","entry_mode":"MANUAL","card":{"number":"{{card_number}}","expiry_month":"{{card_expiry_month}}","expiry_year":"{{card_expiry_year_yy}}"}}}`,
+  },
 };
 
 app.post("/forward-credentials", async (req, res) => {
@@ -593,6 +653,23 @@ app.post("/forward-credentials", async (req, res) => {
         });
       }
     }
+    if (destination === "Global Payments") {
+      const missing = [];
+      if (!globalPaymentsAppId) {
+        missing.push("GLOBAL_PAYMENTS_APP_ID");
+      }
+      if (!globalPaymentsAppKey) {
+        missing.push("GLOBAL_PAYMENTS_APP_KEY");
+      }
+
+      if (missing.length > 0) {
+        const message =
+          missing.length === 2
+            ? `${missing[0]} and ${missing[1]} required in .env`
+            : `${missing[0]} required in .env`;
+        return res.status(400).json({ error: message });
+      }
+    }
 
     const source = instrumentId
       ? { type: "id", id: instrumentId }
@@ -600,6 +677,8 @@ app.post("/forward-credentials", async (req, res) => {
 
     // Build request body based on destination
     let destinationBody = destConfig.body;
+    let destinationHeaders = JSON.parse(JSON.stringify(destConfig.headers));
+    
     if (destination === "Adyen") {
       const adyenBody = JSON.parse(destConfig.body);
       adyenBody.amount = {
@@ -618,6 +697,29 @@ app.post("/forward-credentials", async (req, res) => {
           /currency=\w+/,
           `currency=${(currency || "gbp").toLowerCase()}`
         );
+    } else if (destination === "Global Payments") {
+      // Get Global Payments access token
+      let globalPaymentsAuthToken;
+      try {
+        globalPaymentsAuthToken = await getGlobalPaymentsAccessToken();
+      } catch (error) {
+        return res.status(500).json({
+          error: `Failed to get Global Payments access token: ${error.message}`,
+        });
+      }
+      destinationHeaders.raw = {
+        ...destinationHeaders.raw,
+        Authorization: `Bearer ${globalPaymentsAuthToken}`,
+      };
+
+      // Update body with dynamic values
+      const gpBody = JSON.parse(destConfig.body);
+      gpBody.amount = String(amount || 3000);
+      gpBody.currency = (currency || "GBP").toUpperCase();
+      if (reference) {
+        gpBody.reference = reference;
+      }
+      destinationBody = JSON.stringify(gpBody);
     }
 
     const forwardRequest = {
@@ -627,7 +729,7 @@ app.post("/forward-credentials", async (req, res) => {
       destination_request: {
         url: destConfig.url,
         method: destConfig.method,
-        headers: destConfig.headers,
+        headers: destinationHeaders,
         body: destinationBody,
       },
     };
