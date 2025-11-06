@@ -7,7 +7,7 @@ body {
   display: none !important;
 }
 
-@media (max-width: 868px) {
+@media (max-width: 900px) {
   body {
     margin: 1.5rem;
   }
@@ -17,7 +17,7 @@ body {
   margin-bottom: -1rem;
 }
 
-@media (max-width: 868px) {
+@media (max-width: 900px) {
   .back-link {
     margin-bottom: 2rem;
   }
@@ -247,7 +247,7 @@ code {
 
 /* Emulate Flow checkbox style */
 .save-card-checkbox {
-  margin-bottom: 32px;
+  margin: 8px 0 24px 0;
 }
 
 .checkbox-label {

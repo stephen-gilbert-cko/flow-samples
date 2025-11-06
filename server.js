@@ -107,7 +107,7 @@ async function getGlobalPaymentsAccessToken() {
     }
 
     const data = await response.json();
-    return data.token
+    return data.token;
   } catch (error) {
     console.error("Error getting Global Payments access token:", error);
     throw error;
@@ -462,6 +462,8 @@ app.get("/get-authentication-details", async (req, res) => {
       xid: parsedPayload.xid,
       acs_reference_number: parsedPayload.acs?.reference_number,
       ds_reference_number: parsedPayload.ds?.reference_number,
+      response_code: parsedPayload.response_code,
+      ds_transaction_id: parsedPayload.ds?.transaction_id,
     };
 
     res.status(request.status).json(authDetails);
@@ -649,7 +651,7 @@ const DESTINATION_CONFIGS = {
         "Content-Type": "application/json",
         Accept: "application/json",
         "X-GP-Version": "2021-03-22",
-        "Accept-Encoding": "identity"
+        "Accept-Encoding": "identity",
       },
     },
     body: `{"account_name":"transaction_processing","channel":"CP","type":"SALE","capture_mode":"AUTO","amount":"3000","currency":"GBP","reference":"21450331","country":"GB","payment_method":{"first_name":"Jane","last_name":"Doe","entry_mode":"MANUAL","card":{"number":"{{card_number}}","expiry_month":"{{card_expiry_month}}","expiry_year":"{{card_expiry_year_yy}}"}}}`,
@@ -658,8 +660,15 @@ const DESTINATION_CONFIGS = {
 
 app.post("/forward-credentials", async (req, res) => {
   try {
-    const { destination, token, instrumentId, amount, currency, reference, authDetails } =
-      req.body;
+    const {
+      destination,
+      token,
+      instrumentId,
+      amount,
+      currency,
+      reference,
+      authDetails,
+    } = req.body;
 
     // Try to get access token; fallback to secret key
     const authToken = (await getAccessToken()) || secretKey;
@@ -730,7 +739,7 @@ app.post("/forward-credentials", async (req, res) => {
     // Build request body based on destination
     let destinationBody = destConfig.body;
     let destinationHeaders = JSON.parse(JSON.stringify(destConfig.headers));
-    
+
     if (destination === "Adyen") {
       const adyenBody = JSON.parse(destConfig.body);
       adyenBody.amount = {
@@ -741,6 +750,35 @@ app.post("/forward-credentials", async (req, res) => {
         adyenBody.reference = reference;
       }
       adyenBody.merchantAccount = adyenMerchantAccount;
+
+      // CVV not included in request with instrument
+      if (instrumentId && adyenBody.paymentMethod) {
+        delete adyenBody.paymentMethod.encryptedSecurityCode;
+      }
+
+      // Add authentication details if provided
+      if (authDetails) {
+        if (!adyenBody.mpiData) {
+          adyenBody.mpiData = {};
+        }
+        if (authDetails.response_code) {
+          adyenBody.mpiData.authenticationResponse = authDetails.response_code;
+          adyenBody.mpiData.directoryResponse = authDetails.response_code;
+        }
+        if (authDetails.cryptogram) {
+          adyenBody.mpiData.cavv = authDetails.cryptogram;
+        }
+        if (authDetails.eci) {
+          adyenBody.mpiData.eci = authDetails.eci;
+        }
+        if (authDetails.protocol_version) {
+          adyenBody.mpiData.threeDSVersion = authDetails.protocol_version;
+        }
+        if (authDetails.ds_transaction_id) {
+          adyenBody.mpiData.dsTransID = authDetails.ds_transaction_id;
+        }
+      }
+
       destinationBody = JSON.stringify(adyenBody);
     } else if (destination === "Stripe") {
       destinationBody = destConfig.body
@@ -749,23 +787,39 @@ app.post("/forward-credentials", async (req, res) => {
           /currency=\w+/,
           `currency=${(currency || "gbp").toLowerCase()}`
         );
-      
+
       // Add authentication details if provided
       if (authDetails) {
         const authParams = [];
         if (authDetails.protocol_version) {
-          authParams.push(`payment_method_options[card][three_d_secure][version]=${encodeURIComponent(authDetails.protocol_version)}`);
+          authParams.push(
+            `payment_method_options[card][three_d_secure][version]=${encodeURIComponent(
+              authDetails.protocol_version
+            )}`
+          );
         }
         if (authDetails.eci) {
-          authParams.push(`payment_method_options[card][three_d_secure][electronic_commerce_indicator]=${encodeURIComponent(authDetails.eci)}`);
+          authParams.push(
+            `payment_method_options[card][three_d_secure][electronic_commerce_indicator]=${encodeURIComponent(
+              authDetails.eci
+            )}`
+          );
         }
         if (authDetails.cryptogram) {
-          authParams.push(`payment_method_options[card][three_d_secure][cryptogram]=${encodeURIComponent(authDetails.cryptogram)}`);
+          authParams.push(
+            `payment_method_options[card][three_d_secure][cryptogram]=${encodeURIComponent(
+              authDetails.cryptogram
+            )}`
+          );
         }
         if (authDetails.xid) {
-          authParams.push(`payment_method_options[card][three_d_secure][transaction_id]=${encodeURIComponent(authDetails.xid)}`);
+          authParams.push(
+            `payment_method_options[card][three_d_secure][transaction_id]=${encodeURIComponent(
+              authDetails.xid
+            )}`
+          );
         }
-        
+
         if (authParams.length > 0) {
           destinationBody += "&" + authParams.join("&");
         }
@@ -792,7 +846,7 @@ app.post("/forward-credentials", async (req, res) => {
       if (reference) {
         gpBody.reference = reference;
       }
-      
+
       // Add authentication details if provided
       if (authDetails) {
         if (!gpBody.payment_method) {
@@ -809,7 +863,7 @@ app.post("/forward-credentials", async (req, res) => {
           ds_trans_ref: authDetails.ds_reference_number,
         };
       }
-      
+
       destinationBody = JSON.stringify(gpBody);
     }
 
