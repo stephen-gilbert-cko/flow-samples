@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Flow Samples</title>
     <link rel="icon" href="./favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css" />
     <style type="text/css">
         * {
             font-family: monospace;
@@ -43,17 +44,6 @@
             margin: 0;
         }
 
-        @media (max-width: 900px) {
-            * {
-                padding: 0.5rem;
-                text-indent: 8rem hanging each-line;
-            }
-
-            .friend {
-                display: none;
-            }
-        }
-
         .friend {
             position: fixed;
             bottom: 20px;
@@ -63,6 +53,9 @@
             cursor: pointer;
             transition: right 0.4s ease-out;
             z-index: 1000;
+            padding: 0;
+            margin: 0;
+            font-size: inherit;
         }
 
         .friend.visible {
@@ -71,14 +64,17 @@
         }
 
         .friend svg {
-            width: 100%;
-            height: 100%;
+            width: 100% !important;
+            height: 100% !important;
             transform: rotate(-90deg);
+            padding: 0;
+            margin: 0;
+            font-size: inherit;
         }
 
         .speech-bubble {
             position: absolute;
-            bottom: 80%;
+            bottom: 100%;
             right: 0;
             padding: 10px 15px 10px 30px;
             background: #000;
@@ -133,6 +129,133 @@
                 transform: translateY(0) translateX(0) rotate(0deg);
             }
         }
+
+        @media (prefers-color-scheme: dark) {
+            html:not([data-theme]) * {
+                color: #e0e0e0;
+            }
+
+            html:not([data-theme]) body {
+                background-color: #1a1a1a;
+            }
+
+            html:not([data-theme]) a {
+                color: #4a9eff;
+            }
+
+            html:not([data-theme]) a:hover {
+                color: #6bb0ff;
+                background-color: #2a2a2a;
+            }
+
+            html:not([data-theme]) span.coming-soon {
+                color: #999;
+            }
+
+            html:not([data-theme]) .speech-bubble {
+                background: #2a2a2a;
+                color: #e0e0e0;
+            }
+
+            html:not([data-theme]) .speech-bubble::after {
+                border-top-color: #2a2a2a;
+            }
+
+            html:not([data-theme]) .friend svg path {
+                fill: #e0e0e0;
+            }
+        }
+
+        html[data-theme="dark"] * {
+            color: #e0e0e0;
+        }
+
+        html[data-theme="dark"] body {
+            background-color: #1a1a1a;
+        }
+
+        html[data-theme="dark"] a {
+            color: #4a9eff;
+        }
+
+        html[data-theme="dark"] a:hover {
+            color: #6bb0ff;
+            background-color: #2a2a2a;
+        }
+
+        html[data-theme="dark"] span.coming-soon {
+            color: #999;
+        }
+
+        html[data-theme="dark"] .speech-bubble {
+            background: #2a2a2a;
+            color: #e0e0e0;
+        }
+
+        html[data-theme="dark"] .speech-bubble::after {
+            border-top-color: #2a2a2a;
+        }
+
+        html[data-theme="dark"] .friend svg path {
+            fill: #e0e0e0;
+        }
+
+        .theme-toggle {
+            padding: 0 !important;
+            margin: 0 !important;
+            font-size: inherit;
+            width: 32px;
+            height: 32px;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: transparent !important;
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: transparent !important;
+        }
+
+        .theme-toggle svg {
+            color: #333;
+            padding: 0;
+            margin: 0;
+            font-size: inherit;
+            width: 20px;
+            height: 20px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            html:not([data-theme]) .theme-toggle svg {
+                color: #e0e0e0;
+            }
+        }
+
+        html[data-theme="dark"] .theme-toggle svg {
+            color: #e0e0e0;
+        }
+
+        html[data-theme="light"] .theme-toggle svg {
+            color: #333;
+        }
+
+        @media (max-width: 900px) {
+            * {
+                padding: 0.5rem;
+                text-indent: 7.2rem hanging each-line;
+            }
+
+            .friend {
+                display: none;
+            }
+
+            .theme-toggle {
+                top: 1rem;
+            }
+        }
     </style>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -152,9 +275,10 @@
             }, { once: true });
         });
     </script>
+    <script src="./theme-toggle.js"></script>
 </head>
 
-<body>
+<body class="home-page">
     <pre>
 <strong>flow samples &lt;/&gt;</strong>
 

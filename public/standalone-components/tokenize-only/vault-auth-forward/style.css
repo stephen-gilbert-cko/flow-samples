@@ -304,3 +304,135 @@ code {
   outline: 4px solid rgba(24, 106, 255, 0.4);
   outline-offset: 0;
 }
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) body {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+  }
+
+  html:not([data-theme]) .back-link a {
+    color: #4a9eff;
+  }
+
+  html:not([data-theme]) .back-link a:hover {
+    color: #6bb0ff;
+    background-color: #2a2a2a;
+  }
+
+  html:not([data-theme]) code {
+    background-color: #2a2a2a;
+    color: #e0e0e0;
+  }
+
+  html:not([data-theme]) .payment-method-container.is-mounted:not(:first-child) {
+    border-top-color: #404040;
+  }
+
+  html:not([data-theme]) .dropdown-arrow {
+    color: #999;
+  }
+
+  html:not([data-theme]) .dropdown-item:not(.selected) {
+    color: #999;
+  }
+
+  html:not([data-theme]) .dropdown-item:not(.selected):hover {
+    color: #6bb0ff;
+  }
+
+  html:not([data-theme]) .checkbox-icon {
+    background-color: #2a2a2a;
+    border-color: #404040;
+  }
+
+  html:not([data-theme]) .checkbox-text {
+    color: #b0b0b0;
+  }
+}
+
+html[data-theme="dark"] body {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+}
+
+html[data-theme="dark"] .back-link a {
+  color: #4a9eff;
+}
+
+html[data-theme="dark"] .back-link a:hover {
+  color: #6bb0ff;
+  background-color: #2a2a2a;
+}
+
+html[data-theme="dark"] code {
+  background-color: #2a2a2a;
+  color: #e0e0e0;
+}
+
+html[data-theme="dark"] .payment-method-container.is-mounted:not(:first-child) {
+  border-top-color: #404040;
+}
+
+html[data-theme="dark"] .dropdown-arrow {
+  color: #999;
+}
+
+html[data-theme="dark"] .dropdown-item:not(.selected) {
+  color: #999;
+}
+
+html[data-theme="dark"] .dropdown-item:not(.selected):hover {
+  color: #6bb0ff;
+}
+
+html[data-theme="dark"] .checkbox-icon {
+  background-color: #2a2a2a;
+  border-color: #404040;
+}
+
+html[data-theme="dark"] .checkbox-text {
+  color: #b0b0b0;
+}
+
+.theme-toggle {
+  padding: 0 !important;
+  margin: 0 !important;
+  font-size: inherit;
+  width: 32px;
+  height: 32px;
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: transparent !important;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background: transparent !important;
+}
+
+.theme-toggle svg {
+  color: #333;
+  padding: 0;
+  margin: 0;
+  font-size: inherit;
+  width: 20px;
+  height: 20px;
+}
+
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme]) .theme-toggle svg {
+    color: #e0e0e0;
+  }
+}
+
+html[data-theme="dark"] .theme-toggle svg {
+  color: #e0e0e0;
+}
+
+html[data-theme="light"] .theme-toggle svg {
+  color: #333;
+}
