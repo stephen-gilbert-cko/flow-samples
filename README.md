@@ -24,14 +24,18 @@
 
    ### Optional
 
+   - Set `BASE_URL` to your client-specific Checkout.com Sandbox API base URL.
    - To test stored card flows, set `CUSTOMER_ID` to your Checkout.com Sandbox customer ID.
    - To test credential forwarding, set your external provider Sandbox API credentials.
 
    ``` dotenv
+   # Override default base URL (https://api.sandbox.checkout.com)
+   BASE_URL="https://{prefix}.api.sandbox.checkout.com"
+
    # Stored card payments
    CUSTOMER_ID="cus_..."
    
-   # ------ Forward destinations ------
+   # ------ Supported forward destinations ------
    # Stripe
    STRIPE_SECRET_KEY="sk_test_..."
    # Adyen

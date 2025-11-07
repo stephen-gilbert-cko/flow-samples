@@ -5,6 +5,7 @@ const app = express();
 app.use(express.static("public"));
 app.use(express.json());
 const {
+  baseUrl,
   publicKey,
   secretKey,
   accessKeyId,
@@ -166,7 +167,7 @@ app.post("/create-payment-session", async (req, res) => {
     }
 
     const request = await fetch(
-      "https://api.sandbox.checkout.com/payment-sessions",
+      `${baseUrl}/payment-sessions`,
       {
         method: "POST",
         headers: {
@@ -269,7 +270,7 @@ app.post("/create-instrument", async (req, res) => {
     }
 
     const request = await fetch(
-      "https://api.sandbox.checkout.com/instruments",
+      `${baseUrl}/instruments`,
       {
         method: "POST",
         headers: {
@@ -373,7 +374,7 @@ app.post("/create-authentication-session", async (req, res) => {
       };
     }
 
-    const request = await fetch("https://api.sandbox.checkout.com/sessions", {
+    const request = await fetch(`${baseUrl}/sessions`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${accessToken}`,
@@ -439,7 +440,7 @@ app.get("/get-authentication-details", async (req, res) => {
     }
 
     const request = await fetch(
-      `https://api.sandbox.checkout.com/sessions/${authSessionId}`,
+      `${baseUrl}/sessions/${authSessionId}`,
       {
         method: "GET",
         headers: {
@@ -551,7 +552,7 @@ app.post("/create-payment", async (req, res) => {
       };
     }
 
-    const request = await fetch("https://api.sandbox.checkout.com/payments", {
+    const request = await fetch(`${baseUrl}/payments`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${authToken}`,
