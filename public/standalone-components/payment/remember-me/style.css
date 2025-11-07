@@ -4,7 +4,7 @@ body {
 }
 
 .hidden {
-  display: none !important;
+  display: none;
 }
 
 @media (max-width: 900px) {
@@ -73,9 +73,9 @@ code {
 
 /* Don't show separator between Remember Me components */
 .payment-method-container.rm-components.is-mounted+.payment-method-container.rm-components.is-mounted {
-  border-top: none !important;
-  padding-top: 0 !important;
-  margin-top: 0 !important;
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
 }
 
 .payment-method-container.rm-components.is-mounted~.payment-method-container.is-mounted:not(.rm-components):first-of-type {
@@ -196,46 +196,4 @@ html[data-theme="dark"] .payment-method-container.rm-components.is-mounted~.paym
 
 html[data-theme="dark"] .payment-method-container.is-mounted:not(.rm-components):not(.first-mounted) {
   border-top-color: #404040;
-}
-
-.theme-toggle {
-  padding: 0 !important;
-  margin: 0 !important;
-  font-size: inherit;
-  width: 32px;
-  height: 32px;
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: transparent !important;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.theme-toggle:hover {
-  background: transparent !important;
-}
-
-.theme-toggle svg {
-  color: #333;
-  padding: 0;
-  margin: 0;
-  font-size: inherit;
-  width: 20px;
-  height: 20px;
-}
-
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme]) .theme-toggle svg {
-    color: #e0e0e0;
-  }
-}
-
-html[data-theme="dark"] .theme-toggle svg {
-  color: #e0e0e0;
-}
-
-html[data-theme="light"] .theme-toggle svg {
-  color: #333;
 }

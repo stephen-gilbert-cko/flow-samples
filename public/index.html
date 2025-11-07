@@ -64,8 +64,8 @@
         }
 
         .friend svg {
-            width: 100% !important;
-            height: 100% !important;
+            width: 100%;
+            height: 100%;
             transform: rotate(-90deg);
             padding: 0;
             margin: 0;
@@ -201,22 +201,22 @@
         }
 
         .theme-toggle {
-            padding: 0 !important;
-            margin: 0 !important;
+            padding: 0;
+            margin: 0;
             font-size: inherit;
             width: 32px;
             height: 32px;
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: transparent !important;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: transparent;
             border: none;
             cursor: pointer;
             transition: transform 0.2s ease, opacity 0.2s ease;
         }
 
         .theme-toggle:hover {
-            background: transparent !important;
+            transform: scale(1.1);
         }
 
         .theme-toggle svg {
@@ -245,7 +245,7 @@
         @media (max-width: 900px) {
             * {
                 padding: 0.5rem;
-                text-indent: 7.2rem hanging each-line;
+                text-indent: 7.5em hanging each-line;
             }
 
             .friend {
@@ -254,6 +254,7 @@
 
             .theme-toggle {
                 top: 1rem;
+                right: 1rem;
             }
         }
     </style>

@@ -4,7 +4,7 @@ body {
 }
 
 .hidden {
-  display: none !important;
+  display: none;
 }
 
 @media (max-width: 900px) {
@@ -214,46 +214,4 @@ html[data-theme="dark"] code {
 
 html[data-theme="dark"] .payment-method-container.is-mounted:not(:first-child) {
   border-top-color: #404040;
-}
-
-.theme-toggle {
-  padding: 0 !important;
-  margin: 0 !important;
-  font-size: inherit;
-  width: 32px;
-  height: 32px;
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  background: transparent !important;
-  border: none;
-  cursor: pointer;
-  transition: transform 0.2s ease, opacity 0.2s ease;
-}
-
-.theme-toggle:hover {
-  background: transparent !important;
-}
-
-.theme-toggle svg {
-  color: #333;
-  padding: 0;
-  margin: 0;
-  font-size: inherit;
-  width: 20px;
-  height: 20px;
-}
-
-@media (prefers-color-scheme: dark) {
-  html:not([data-theme]) .theme-toggle svg {
-    color: #e0e0e0;
-  }
-}
-
-html[data-theme="dark"] .theme-toggle svg {
-  color: #e0e0e0;
-}
-
-html[data-theme="light"] .theme-toggle svg {
-  color: #333;
 }
