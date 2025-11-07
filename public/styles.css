@@ -202,16 +202,6 @@ html {
   line-height: 1;
 }
 
-@media (max-width: 900px) {
-  .theme-toggle {
-    display: none;
-  }
-  
-  body.home-page .theme-toggle {
-    display: flex;
-  }
-}
-
 .theme-toggle svg {
   width: 20px;
   height: 20px;
