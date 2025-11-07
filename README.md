@@ -30,7 +30,7 @@
 
    ``` dotenv
    # Override default base URL (https://api.sandbox.checkout.com)
-   BASE_URL="https://{prefix}.api.sandbox.checkout.com"
+   BASE_URL="https://[prefix].api.sandbox.checkout.com"
 
    # Stored card payments
    CUSTOMER_ID="cus_..."
