@@ -1,5 +1,7 @@
 # Flow Samples
 
+Within the [/public](/public) folder, you'll find a number of example [Flow](https://www.checkout.com/docs/payments/accept-payments/accept-a-payment-on-your-website) integrations - each demonstrating different possible configurations.
+
 ## Get started
 
 1. In the project root, create a `.env` file.
