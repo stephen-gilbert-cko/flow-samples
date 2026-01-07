@@ -169,13 +169,13 @@ const requestPayload = {
     if (!authTokenResponse?.data) {
       return;
     }
-    console.log("Card tokenized:", authTokenResponse.data);
+    console.log("Card tokenized:", JSON.stringify(authTokenResponse.data, null, 2));
 
     const paymentTokenResponse = await cardComponent.tokenize();
     if (!paymentTokenResponse?.data) {
       return;
     }
-    console.log("Card tokenized:", paymentTokenResponse.data);
+    console.log("Card tokenized:", JSON.stringify(paymentTokenResponse.data, null, 2));
 
     await handleTokens(
       authTokenResponse.data.token,
@@ -224,7 +224,7 @@ async function processAuthentication(token) {
       return;
     }
 
-    console.log("Authentication session created:", sessionResponse);
+    console.log("Authentication session created:", JSON.stringify(sessionResponse, null, 2));
 
     // Store session ID for after authentication completes
     sessionStorage.setItem("authSessionId", sessionResponse.id);

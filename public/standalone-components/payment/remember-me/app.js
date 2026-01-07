@@ -167,6 +167,7 @@
     },
     onPaymentCompleted: (_component, paymentResponse) => {
       console.log("Payment completed: ", paymentResponse.id);
+      showPaymentConfirmationModal(paymentResponse.id);
     },
     onChange: (component) => {
       const currentIsValid = component.isValid();
@@ -260,4 +261,45 @@ if (paymentStatus === "failed") {
 
 if (paymentId) {
   console.log("Create Payment with PaymentId: ", paymentId);
+}
+
+function showPaymentConfirmationModal(paymentId) {
+  const modal = document.getElementById("payment-confirmation-modal");
+  const paymentIdDisplay = document.getElementById("payment-id-display");
+  const dashboardLink = document.getElementById("dashboard-link");
+  
+  if (modal && paymentId) {
+    if (paymentIdDisplay) {
+      paymentIdDisplay.textContent = paymentId;
+    }
+    
+    if (dashboardLink) {
+      dashboardLink.href = `https://dashboard.sandbox.checkout.com/payments/all-payments/payment/${paymentId}`;
+    }
+    
+    modal.classList.add("show");
+  }
+}
+
+async function copyPaymentId() {
+  const paymentIdDisplay = document.getElementById("payment-id-display");
+  if (paymentIdDisplay && paymentIdDisplay.textContent) {
+    try {
+      // Use modern Clipboard API if available
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(paymentIdDisplay.textContent);
+      } else {
+        // Fallback for older browsers - create temporary input
+        const tempInput = document.createElement("input");
+        tempInput.value = paymentIdDisplay.textContent;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        tempInput.setSelectionRange(0, 99999);
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+      }
+    } catch (err) {
+      console.error('Failed to copy payment ID:', err);
+    }
+  }
 }

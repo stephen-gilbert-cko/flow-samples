@@ -169,7 +169,7 @@ const requestPayload = {
     if (!response?.data) {
       return;
     }
-    console.log("Card tokenized:", response.data);
+    console.log("Card tokenized:", JSON.stringify(response.data, null, 2));
 
     await handleToken(response.data.token);
   });
@@ -203,7 +203,7 @@ async function createInstrument(token) {
       return null;
     }
 
-    console.log("Instrument created:", instrumentResponse);
+    console.log("Instrument created:", JSON.stringify(instrumentResponse, null, 2));
 
     // Extract and store the instrument ID (src_...)
     const instrumentId = instrumentResponse.id;
@@ -248,7 +248,7 @@ async function processAuthentication(instrumentId) {
       return;
     }
 
-    console.log("Authentication session created:", sessionResponse);
+    console.log("Authentication session created:", JSON.stringify(sessionResponse, null, 2));
 
     // Store session ID for after authentication completes
     sessionStorage.setItem("authSessionId", sessionResponse.id);

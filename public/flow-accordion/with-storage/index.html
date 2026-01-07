@@ -37,6 +37,26 @@
         </div>
     </div>
 
+    <div id="payment-confirmation-modal" class="payment-confirmation-modal">
+        <div class="payment-confirmation-modal-content">
+            <h2>PAYMENT SUCCESSFUL</h2>
+            <div class="payment-id-container">
+                <div class="payment-id-wrapper">
+                    <span id="payment-id-display" class="payment-id-text"></span>
+                    <button class="copy-button" onclick="copyPaymentId()" title="Copy Payment ID" aria-label="Copy Payment ID">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16" focusable="false" class="icon-action-copy">
+                            <path fill="currentColor" fill-rule="evenodd" d="M5 1h-.5v2h1V2h8v9h-1v1h2V1H5ZM2 4h-.5v11h10V4H2Zm.5 10V5h8v9h-8Z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="dashboard-link-container">
+                <a id="dashboard-link" href="#" target="_blank" rel="noopener noreferrer">View in Dashboard</a>
+            </div>
+            <button class="payment-confirmation-modal-button" onclick="window.location.reload()">Return</button>
+        </div>
+    </div>
+
     <script src="https://checkout-web-components.checkout.com/index.js"></script>
     <script src="../../themes.js"></script>
     <script src="app.js"></script>
