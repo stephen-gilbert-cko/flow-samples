@@ -69,7 +69,7 @@ npm start
 
 To test Apple Pay in Sandbox, you need to:
 - Have an `https` domain with valid TLS certificate.
-- Complete [domain verification](https://www.checkout.com/docs/payments/add-payment-methods/apple-pay/web#Before_you_begin) with [this file](https://pay.checkout.com/.well-known/apple-developer-merchantid-domain-association).
+- Complete [domain verification](https://www.checkout.com/docs/payments/add-payment-methods/apple-pay/web#Before_you_begin).
 - Sign in with a [Sandbox Tester](https://developer.apple.com/apple-pay/sandbox-testing/) Apple ID to add test cards to your device wallet. 
 
 ## Payment method availability
