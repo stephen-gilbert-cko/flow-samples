@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Standalone components: with dynamic amount</title>
+    <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../../../styles.css" />
+    <link rel="stylesheet" href="./style.css" />
+</head>
+
+<body>
+    <div id="page-loader" class="loader"></div>
+
+    <div id="page-content" class="page-content hidden">
+        <div class="back-link">
+            <a href="../../../">← flow samples</a>
+        </div>
+
+        <div class="container">
+            <h1>Standalone components: with dynamic amount</h1>
+            <p>Card component with commercial card surcharge via <code>handleSubmit</code></p>
+
+            <div id="card-container"></div>
+
+            <div id="commercial-card-warning" class="commercial-card-warning hidden">
+                <span class="warning-icon">⚠️</span>
+                <span class="warning-text">A £1 commercial card surcharge will be applied to this transaction.</span>
+            </div>
+
+            <span id="error-message"></span>
+            <span id="successful-payment-message"></span>
+        </div>
+
+        <div id="successToast" class="toast success">
+            <span>The payment was successful</span>
+        </div>
+
+        <div id="failedToast" class="toast failed">
+            <span>The payment failed, try again</span>
+        </div>
+    </div>
+
+    <div id="payment-confirmation-modal" class="payment-confirmation-modal">
+        <div class="payment-confirmation-modal-content">
+            <h2>PAYMENT SUCCESSFUL</h2>
+            <div class="payment-id-container">
+                <div class="payment-id-wrapper">
+                    <span id="payment-id-display" class="payment-id-text"></span>
+                    <button class="copy-button" onclick="copyPaymentId()" title="Copy Payment ID" aria-label="Copy Payment ID">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16" focusable="false" class="icon-action-copy">
+                            <path fill="currentColor" fill-rule="evenodd" d="M5 1h-.5v2h1V2h8v9h-1v1h2V1H5ZM2 4h-.5v11h10V4H2Zm.5 10V5h8v9h-8Z" clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="dashboard-link-container">
+                <a id="dashboard-link" href="#" target="_blank" rel="noopener noreferrer">View in Dashboard</a>
+            </div>
+            <button class="payment-confirmation-modal-button" onclick="window.location.reload()">Return</button>
+        </div>
+    </div>
+
+    <script src="https://checkout-web-components.checkout.com/index.js"></script>
+    <script src="../../../themes.js"></script>
+    <script src="app.js"></script>
+</body>
+
+</html>

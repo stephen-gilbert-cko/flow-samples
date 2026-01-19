@@ -24,6 +24,9 @@ const port = process.env.PORT || 3000;
 let accessToken = null;
 let tokenExpiry = null;
 
+// Store surcharge amounts per payment session - simplified for demonstration purposes; use a database in production
+const paymentSessionSurcharges = new Map();
+
 async function getAccessToken() {
   // Check if access key credentials provided
   if (!accessKeyId || !accessKeySecret) {
@@ -246,11 +249,120 @@ app.post("/create-payment-session", async (req, res) => {
 
     const parsedPayload = await request.json();
 
+    // Store base amount for this payment session if creation was successful
+    if (request.status === 201) {
+      const baseAmount = amount || 3000;
+      paymentSessionSurcharges.set(parsedPayload.id, {
+        baseAmount: baseAmount,
+        surchargeAmount: 0,
+      });
+    }
+
     res.status(request.status).send(parsedPayload);
   } catch (error) {
     console.error("Error creating payment session:", error);
     res.status(500).json({
       error: "Internal server error while creating payment session",
+    });
+  }
+});
+
+app.post("/calculate-surcharge/:paymentSessionId", async (req, res) => {
+  try {
+    const { paymentSessionId } = req.params;
+    const { card_category } = req.body;
+
+    // Get base amount for this payment session
+    const sessionData = paymentSessionSurcharges.get(paymentSessionId);
+    if (!sessionData) {
+      return res.status(404).json({
+        error: "Payment session not found",
+      });
+    }
+
+    // Calculate surcharge based on card category
+    let surchargeAmount = 0;
+    if (card_category === "commercial") {
+      surchargeAmount = 100;
+    }
+
+    // Update stored surcharge amount
+    sessionData.surchargeAmount = surchargeAmount;
+    paymentSessionSurcharges.set(paymentSessionId, sessionData);
+
+    res.json({
+      surchargeAmount: surchargeAmount,
+      baseAmount: sessionData.baseAmount,
+      totalAmount: sessionData.baseAmount + surchargeAmount,
+    });
+  } catch (error) {
+    console.error("Error calculating surcharge:", error);
+    res.status(500).json({
+      error: "Internal server error while calculating surcharge",
+    });
+  }
+});
+
+app.post("/submit-payment-session/:paymentSessionId", async (req, res) => {
+  try {
+    const { paymentSessionId } = req.params;
+    const { session_data, amount } = req.body;
+
+    // Validate amount matches expected base + surcharge
+    const sessionData = paymentSessionSurcharges.get(paymentSessionId);
+    if (!sessionData) {
+      return res.status(404).json({
+        error: "Payment session not found",
+      });
+    }
+
+    const expectedAmount = sessionData.baseAmount + sessionData.surchargeAmount;
+    if (amount !== expectedAmount) {
+      return res.status(400).json({
+        error: `Invalid amount. Expected ${expectedAmount} but received ${amount}`,
+        expectedAmount: expectedAmount,
+        receivedAmount: amount,
+      });
+    }
+
+    // Try to get access token; fallback to secret key
+    const token = await getAccessToken();
+    const authToken = token || secretKey;
+
+    if (!authToken) {
+      return res.status(500).json({
+        error:
+          "No authentication credentials provided. Please set ACCESS_KEY_ID + ACCESS_KEY_SECRET or SECRET_KEY in .env file.",
+      });
+    }
+
+    const request = await fetch(
+      `${baseUrl}/payment-sessions/${paymentSessionId}/submit`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          session_data: session_data,
+          amount: amount,
+        }),
+      }
+    );
+
+    const parsedPayload = await request.json();
+
+    // Clean up stored surcharge data after successful submission
+    if (request.status === 201 || request.status === 202) {
+      paymentSessionSurcharges.delete(paymentSessionId);
+    }
+
+    res.status(request.status).send(parsedPayload);
+  } catch (error) {
+    console.error("Error submitting payment session:", error);
+    res.status(500).json({
+      error: "Internal server error while submitting payment session",
     });
   }
 });
