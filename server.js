@@ -178,7 +178,7 @@ app.post("/create-payment-session", async (req, res) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          amount: amount || 3000,
+          amount: amount === 0 ? 0 : amount || 3000,
           currency: currency || "GBP",
           billing: billing || {
             address: {
