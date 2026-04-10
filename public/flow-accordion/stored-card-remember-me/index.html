@@ -4,9 +4,9 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Standalone components: with dynamic amount</title>
-    <link rel="icon" href="../../../favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="../../../styles.css" />
+    <title>Flow accordion: with card storage + stored card selection + remember me</title>
+    <link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="../../styles.css" />
     <link rel="stylesheet" href="./style.css" />
 </head>
 
@@ -15,34 +15,14 @@
 
     <div id="page-content" class="page-content hidden">
         <div class="back-link">
-            <a href="../../../">← flow samples</a>
+            <a href="../../">← flow samples</a>
         </div>
 
         <div class="container">
-            <h1>Standalone components: with dynamic amount</h1>
-            <p>Card component with commercial card surcharge via <code>handleSubmit</code> (e.g. <code>4293 1891 0000 0008</code>)</p>
+            <h1>Accordion: with card storage + stored card selection + remember me</h1>
+            <p>Flow component with <code>store_payment_details: "collect_consent"</code>, <code>stored_card</code> and <code>"remember_me"</code> enabled</p>
 
-            <div class="currency-switcher">
-                <label for="currency-select">Payment currency</label>
-                <select id="currency-select" aria-label="Payment currency">
-                    <option value="GBP">🇬🇧 GBP</option>
-                    <option value="AUD">🇦🇺 AUD</option>
-                </select>
-            </div>
-
-            <div id="card-container"></div>
-
-            <div id="payment-total" class="payment-total"></div>
-
-            <div id="commercial-card-warning" class="commercial-card-warning hidden">
-                <span class="warning-icon">⚠️</span>
-                <span class="warning-text">A £1 commercial card surcharge will be applied to this transaction.</span>
-            </div>
-
-            <div id="card-currency-tooltip" class="card-currency-tooltip hidden">
-                <span class="tooltip-icon">ℹ️</span>
-                <span class="card-currency-tooltip-text"></span>
-            </div>
+            <div id="flow-container"></div>
 
             <span id="error-message"></span>
             <span id="successful-payment-message"></span>
@@ -78,7 +58,7 @@
     </div>
 
     <script src="https://checkout-web-components.checkout.com/index.js"></script>
-    <script src="../../../themes.js"></script>
+    <script src="../../themes.js"></script>
     <script src="app.js"></script>
 </body>
 

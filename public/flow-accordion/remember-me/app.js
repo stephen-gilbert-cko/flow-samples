@@ -150,6 +150,9 @@
     onError: (component, error) => {
       console.log("onError", error, "Component", component.type);
     },
+    onTokenized: (_self, tokenizeResult) => {
+      console.log("onTokenized:", tokenizeResult);
+    }
   };
 
   // Add custom appearance if dark theme set

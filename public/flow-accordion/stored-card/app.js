@@ -131,12 +131,11 @@
     onChange: (component) => {
       const currentIsValid = component.isValid();
       const previousIsValid = componentValidityState.get(component.type);
-      
+
       // Only log if validity state has changed
       if (previousIsValid !== currentIsValid) {
         console.log(
-          `onChange() -> isValid: "${currentIsValid}" for "${
-            component.type
+          `onChange() -> isValid: "${currentIsValid}" for "${component.type
           }"`
         );
         componentValidityState.set(component.type, currentIsValid);
@@ -151,9 +150,9 @@
     onAuthorized: (_self, authorizeResult) => {
       console.log("onAuthorized:", authorizeResult);
     },
-    onError: (component, error) => {
-      console.log("onError", error, "Component", component.type);
-    },
+    onTokenized: (_self, tokenizeResult) => {
+      console.log("onTokenized:", tokenizeResult);
+    }
   };
 
   // Add custom appearance if dark theme set
@@ -201,16 +200,16 @@ function showPaymentConfirmationModal(paymentId) {
   const modal = document.getElementById("payment-confirmation-modal");
   const paymentIdDisplay = document.getElementById("payment-id-display");
   const dashboardLink = document.getElementById("dashboard-link");
-  
+
   if (modal && paymentId) {
     if (paymentIdDisplay) {
       paymentIdDisplay.textContent = paymentId;
     }
-    
+
     if (dashboardLink) {
       dashboardLink.href = `https://dashboard.sandbox.checkout.com/payments/all-payments/payment/${paymentId}`;
     }
-    
+
     modal.classList.add("show");
   }
 }

@@ -1,7 +1,7 @@
 /* global CheckoutWebComponents */
 (async () => {
   const config = await fetch("/config");
-  const { publicKey } = await config.json();
+  const { publicKey, customerId } = await config.json();
 
   const requestPayload = {
     amount: 3000,
@@ -10,7 +10,7 @@
     description: "Payment",
     customer: {
       email: "returning.user@checkout.com",
-      name: "Returning User",
+      name: "John Smith",
     },
     items: [
       {
@@ -45,11 +45,14 @@
     },
     payment_method_configuration: {
       card: {
-        store_payment_details: "disabled",
+        store_payment_details: "collect_consent",
+      },
+      stored_card: {
+        customer_id: customerId,
       },
     },
-    success_url: `${window.location.origin}/standalone-components/payment/no-storage?status=succeeded`,
-    failure_url: `${window.location.origin}/standalone-components/payment/no-storage?status=failed`,
+    success_url: `${window.location.origin}/flow-accordion/stored-card?status=succeeded`,
+    failure_url: `${window.location.origin}/flow-accordion/stored-card?status=failed`,
   };
 
   const response = await fetch("/create-payment-session", {
@@ -66,61 +69,6 @@
     console.error("Error creating payment session", paymentSession);
     return;
   }
-
-  // Payment methods to display
-  const componentTypes = [
-    "authentication",
-    "shipping_address",
-    "card",
-    "applepay",
-    "googlepay",
-    "paypal",
-    "alipay_cn",
-    "alipay_hk",
-    "alma",
-    "bancontact",
-    "benefit",
-    "bizum",
-    "dana",
-    "eps",
-    "gcash",
-    "ideal",
-    "kakaopay",
-    "klarna",
-    "knet",
-    "mbway",
-    "mobilepay",
-    "multibanco",
-    "p24",
-    "plaid",
-    "qpay",
-    "sepa",
-    "stcpay",
-    "tabby",
-    "tamara",
-    "tng",
-    "truemoney",
-    "twint",
-    "vipps",
-  ];
-  const readyComponents = new Set();
-  let firstMountedElement = null;
-
-  const hideLoaderWhenAllReady = () => {
-    if (readyComponents.size === componentTypes.length) {
-      const pageLoader = document.getElementById("page-loader");
-      const pageContent = document.getElementById("page-content");
-      if (pageLoader) {
-        pageLoader.classList.add("hidden");
-        setTimeout(() => {
-          pageLoader.remove();
-        }, 300);
-      }
-      if (pageContent) {
-        pageContent.classList.remove("hidden");
-      }
-    }
-  };
 
   // Track previous isValid state for each component
   const componentValidityState = new Map();
@@ -160,10 +108,20 @@
     environment: "sandbox",
     locale: "en-GB",
     paymentSession,
-    onReady: (component) => {
-      console.log(`onReady for "${component.type}"`);
-      readyComponents.add(component.type);
-      hideLoaderWhenAllReady();
+    onReady: () => {
+      console.log("onReady");
+
+      const pageLoader = document.getElementById("page-loader");
+      const pageContent = document.getElementById("page-content");
+      if (pageLoader) {
+        pageLoader.classList.add("hidden");
+        setTimeout(() => {
+          pageLoader.remove();
+        }, 300);
+      }
+      if (pageContent) {
+        pageContent.classList.remove("hidden");
+      }
     },
     onPaymentCompleted: (_component, paymentResponse) => {
       console.log("Payment completed: ", paymentResponse.id);
@@ -172,12 +130,11 @@
     onChange: (component) => {
       const currentIsValid = component.isValid();
       const previousIsValid = componentValidityState.get(component.type);
-      
+
       // Only log if validity state has changed
       if (previousIsValid !== currentIsValid) {
         console.log(
-          `onChange() -> isValid: "${currentIsValid}" for "${
-            component.type
+          `onChange() -> isValid: "${currentIsValid}" for "${component.type
           }"`
         );
         componentValidityState.set(component.type, currentIsValid);
@@ -209,36 +166,11 @@
   const checkout = await CheckoutWebComponents(checkoutConfig);
 
   const flowContainer = document.getElementById("flow-container");
+  const flowComponent = checkout.create("flow");
 
-  const createPaymentComponent = async (type) => {
-    const container = document.createElement("div");
-    container.id = `${type}-container`;
-    container.className = "payment-method-container";
-    
-    // Mark Remember Me components as a grouped set
-    if (["authentication", "shipping_address", "card"].includes(type)) {
-      container.classList.add("rm-components");
-    }
-    
-    flowContainer.appendChild(container);
-
-    const component = checkout.create(type);
-    if (await component.isAvailable()) {
-      component.mount(container);
-      container.classList.add("is-mounted");
-      
-      if (!firstMountedElement) {
-        firstMountedElement = container;
-        container.classList.add("first-mounted");
-      }
-    } else {
-      console.log(`"${type}" is not available`);
-      readyComponents.add(type); // Mark as "ready" to avoid blocking the loader
-      hideLoaderWhenAllReady();
-    }
-  };
-
-  await Promise.all(componentTypes.map(createPaymentComponent));
+  if (await flowComponent.isAvailable()) {
+    flowComponent.mount(flowContainer);
+  }
 })();
 
 function triggerToast(id) {
@@ -270,16 +202,16 @@ function showPaymentConfirmationModal(paymentId) {
   const modal = document.getElementById("payment-confirmation-modal");
   const paymentIdDisplay = document.getElementById("payment-id-display");
   const dashboardLink = document.getElementById("dashboard-link");
-  
+
   if (modal && paymentId) {
     if (paymentIdDisplay) {
       paymentIdDisplay.textContent = paymentId;
     }
-    
+
     if (dashboardLink) {
       dashboardLink.href = `https://dashboard.sandbox.checkout.com/payments/all-payments/payment/${paymentId}`;
     }
-    
+
     modal.classList.add("show");
   }
 }
