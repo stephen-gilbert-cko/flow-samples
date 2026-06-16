@@ -2,7 +2,7 @@
 (async () => {
   const config = await fetch("/config");
   const { publicKey } = await config.json();
-  let surchargeInfo = null; // Store surcharge info from backend
+  let surchargeInfo = null;
   let paymentSession = null;
   let checkout = null;
   let cardComponent = null;
@@ -116,7 +116,7 @@
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ baseAmount }),
-      }
+      },
     );
     const result = await response.json();
     if (!response.ok) {
@@ -166,17 +166,20 @@
       : requestPayload.amount;
 
     const paymentSessionId = paymentSession.id;
-    const response = await fetch(`/submit-payment-session/${paymentSessionId}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `/submit-payment-session/${paymentSessionId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          session_data: submitData.session_data,
+          amount: paymentAmount,
+          currency: requestPayload.currency,
+        }),
       },
-      body: JSON.stringify({
-        session_data: submitData.session_data,
-        amount: paymentAmount,
-        currency: requestPayload.currency,
-      }),
-    });
+    );
 
     const result = await response.json();
 
@@ -192,30 +195,32 @@
   const componentValidityState = new Map();
 
   function getCurrentTheme() {
-    const dataTheme = document.documentElement.getAttribute('data-theme');
-    if (dataTheme === 'dark' || dataTheme === 'light') {
+    const dataTheme = document.documentElement.getAttribute("data-theme");
+    if (dataTheme === "dark" || dataTheme === "light") {
       return dataTheme;
     }
     // Check system preference if no theme is set
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
   }
 
   function getAppearance() {
     const theme = getCurrentTheme();
-    if (theme === 'dark') {
+    if (theme === "dark") {
       return {
-        colorAction: '#186aff',
-        colorBackground: '#181818',
-        colorBorder: '#272932',
-        colorDisabled: '#777478',
-        colorError: '#FF3300',
-        colorFormBackground: '#272932',
-        colorFormBorder: '#272932',
-        colorInverse: '#F9F9FB',
-        colorOutline: '#275EC4',
-        colorPrimary: '#F9F9FB',
-        colorSecondary: '#b0b0b0',
-        colorSuccess: '#2ECC71'
+        colorAction: "#186aff",
+        colorBackground: "#181818",
+        colorBorder: "#272932",
+        colorDisabled: "#777478",
+        colorError: "#FF3300",
+        colorFormBackground: "#272932",
+        colorFormBorder: "#272932",
+        colorInverse: "#F9F9FB",
+        colorOutline: "#275EC4",
+        colorPrimary: "#F9F9FB",
+        colorSecondary: "#b0b0b0",
+        colorSuccess: "#2ECC71",
       };
     }
     return undefined; // Use defaults for light theme
@@ -223,124 +228,101 @@
 
   function buildCheckoutConfig(session) {
     return {
-    publicKey: publicKey,
-    environment: "sandbox",
-    locale: "en-GB",
-    paymentSession: session,
-    onReady: () => {
-      console.log("onReady");
+      publicKey: publicKey,
+      environment: "sandbox",
+      locale: "en-GB",
+      paymentSession: session,
+      onReady: () => {
+        console.log("onReady");
 
-      const pageLoader = document.getElementById("page-loader");
-      const pageContent = document.getElementById("page-content");
-      if (pageLoader) {
-        pageLoader.classList.add("hidden");
-      }
-      if (pageContent) {
-        pageContent.classList.remove("hidden");
-      }
-      updatePaymentTotalDisplay();
-    },
-    onPaymentCompleted: (component, paymentResponse) => {
-      console.log("Payment completed: ", paymentResponse.id);
-      showPaymentConfirmationModal(paymentResponse.id);
-    },
-    onChange: (component) => {
-      const currentIsValid = component.isValid();
-      const previousIsValid = componentValidityState.get(component.type);
-
-      // Only log if validity state has changed
-      if (previousIsValid !== currentIsValid) {
-        console.log(
-          `onChange() -> isValid: "${currentIsValid}" for "${component.type
-          }"`
-        );
-        componentValidityState.set(component.type, currentIsValid);
-      }
-    },
-    onCardBinChanged: async (component, cardMetadata) => {
-      console.log("onCardBinChanged:", cardMetadata);
-      lastCardMetadata = cardMetadata;
-
-      const warningElement = document.getElementById("commercial-card-warning");
-
-      if (cardMetadata.card_category === 'commercial') {
-        // Show warning message with currency-specific symbol
-        if (warningElement) {
-          const symbol = getCurrencySymbol(requestPayload.currency);
-          const warningText = warningElement.querySelector(".warning-text");
-          if (warningText) {
-            warningText.textContent = `A ${symbol}1 commercial card surcharge will be applied to this transaction.`;
-          }
-          warningElement.classList.remove("hidden");
+        const pageLoader = document.getElementById("page-loader");
+        const pageContent = document.getElementById("page-content");
+        if (pageLoader) {
+          pageLoader.classList.add("hidden");
         }
-      } else {
-        if (warningElement) {
-          warningElement.classList.add("hidden");
+        if (pageContent) {
+          pageContent.classList.remove("hidden");
         }
-      }
+        updatePaymentTotalDisplay();
+      },
+      onPaymentCompleted: (component, paymentResponse) => {
+        console.log("Payment completed: ", paymentResponse.id);
+        showPaymentConfirmationModal(paymentResponse.id);
+      },
+      onChange: (component) => {
+        const currentIsValid = component.isValid();
+        const previousIsValid = componentValidityState.get(component.type);
 
-      const cardCurrencyTooltip = document.getElementById("card-currency-tooltip");
-      const cardCurrencyTooltipText = cardCurrencyTooltip?.querySelector(".card-currency-tooltip-text");
-      if (cardMetadata.currency && cardMetadata.currency !== requestPayload.currency) {
-        if (cardCurrencyTooltip && cardCurrencyTooltipText) {
-          const cardCurrency = cardMetadata.currency;
-          cardCurrencyTooltipText.replaceChildren();
-          cardCurrencyTooltipText.append(
-            document.createTextNode(
-              `Your card currency is ${cardCurrency}. Please note that FX fees may be applied by your bank. `
-            )
+        // Only log if validity state has changed
+        if (previousIsValid !== currentIsValid) {
+          console.log(
+            `onChange() -> isValid: "${currentIsValid}" for "${
+              component.type
+            }"`,
           );
-          const switchLink = document.createElement("a");
-          switchLink.href = "#";
-          switchLink.className = "card-currency-switch-link";
-          switchLink.textContent = `Switch to ${cardCurrency}`;
-          switchLink.addEventListener("click", (e) => {
-            e.preventDefault();
-            void applyPaymentCurrencyFromCardLink(cardCurrency);
-          });
-          cardCurrencyTooltipText.appendChild(switchLink);
-          cardCurrencyTooltip.classList.remove("hidden");
+          componentValidityState.set(component.type, currentIsValid);
         }
-      } else {
-        if (cardCurrencyTooltip) {
-          cardCurrencyTooltip.classList.add("hidden");
-        }
-      }
+      },
+      onCardBinChanged: async (component, cardMetadata) => {
+        console.log("onCardBinChanged:", cardMetadata);
+        lastCardMetadata = cardMetadata;
 
-      try {
+        const warningElement = document.getElementById(
+          "commercial-card-warning",
+        );
+
         if (cardMetadata.card_category === "commercial") {
-          const surchargeResult = await calculateSurcharge(cardMetadata);
-          surchargeInfo = surchargeResult;
+          // Show warning message with currency-specific symbol
+          if (warningElement) {
+            const symbol = getCurrencySymbol(requestPayload.currency);
+            const warningText = warningElement.querySelector(".warning-text");
+            if (warningText) {
+              warningText.textContent = `A ${symbol}1 commercial card surcharge will be applied to this transaction.`;
+            }
+            warningElement.classList.remove("hidden");
+          }
         } else {
+          if (warningElement) {
+            warningElement.classList.add("hidden");
+          }
+        }
+
+        updateCardCurrencyTooltip();
+
+        try {
+          if (cardMetadata.card_category === "commercial") {
+            const surchargeResult = await calculateSurcharge(cardMetadata);
+            surchargeInfo = surchargeResult;
+          } else {
+            surchargeInfo = null;
+          }
+        } catch (error) {
+          console.error("Failed to calculate surcharge:", error);
           surchargeInfo = null;
+          if (warningElement) {
+            warningElement.classList.add("hidden");
+          }
         }
-      } catch (error) {
-        console.error("Failed to calculate surcharge:", error);
-        surchargeInfo = null;
-        if (warningElement) {
-          warningElement.classList.add("hidden");
-        }
-      }
-      updatePaymentTotalDisplay();
-    },
-    onSubmit: (component) => {
-      console.log(`onSubmit for "${component.type}"`);
-    },
-    onAuthorized: (component, authorizeResult) => {
-      console.log("onAuthorized:", authorizeResult);
-    },
-    onError: (component, error) => {
-      console.log("onError", error, "Component", component.type);
-    },
-    onTokenized: (_self, tokenizeResult) => {
-      console.log("onTokenized:", tokenizeResult);
-    },
-    handleSubmit: async (component, submitData) => {
-      console.log("handleSubmit:", submitData);
-      const submitResponse = await submitPaymentSession(submitData);
-      return submitResponse;
-    }
-  };
+        updatePaymentTotalDisplay();
+      },
+      onSubmit: (component) => {
+        console.log(`onSubmit for "${component.type}"`);
+      },
+      onAuthorized: (component, authorizeResult) => {
+        console.log("onAuthorized:", authorizeResult);
+      },
+      onError: (component, error) => {
+        console.log("onError", error, "Component", component.type);
+      },
+      onTokenized: (_self, tokenizeResult) => {
+        console.log("onTokenized:", tokenizeResult);
+      },
+      handleSubmit: async (component, submitData) => {
+        console.log("handleSubmit:", submitData);
+        const submitResponse = await submitPaymentSession(submitData);
+        return submitResponse;
+      },
+    };
   }
 
   async function initCheckoutAndMountCard() {
@@ -365,17 +347,57 @@
     updatePaymentTotalDisplay();
   }
 
-  async function applyPaymentCurrencyFromCardLink(cardCurrency) {
-    const amount = CURRENCY_AMOUNTS[cardCurrency] ?? 3000;
+  // Show/hide the "your card is in a different currency" tooltip based on the
+  // currently entered card (lastCardMetadata) vs the selected payment currency.
+  function updateCardCurrencyTooltip() {
+    const cardCurrencyTooltip = document.getElementById(
+      "card-currency-tooltip",
+    );
+    const cardCurrencyTooltipText = cardCurrencyTooltip?.querySelector(
+      ".card-currency-tooltip-text",
+    );
+    const cardCurrency = lastCardMetadata?.currency;
+
+    if (cardCurrency && cardCurrency !== requestPayload.currency) {
+      if (cardCurrencyTooltip && cardCurrencyTooltipText) {
+        cardCurrencyTooltipText.replaceChildren();
+        cardCurrencyTooltipText.append(
+          document.createTextNode(
+            `Your card currency is ${cardCurrency}, meaning FX fees may be applied by your bank. `,
+          ),
+        );
+        const switchLink = document.createElement("a");
+        switchLink.href = "#";
+        switchLink.className = "card-currency-switch-link";
+        switchLink.textContent = `Switch to ${cardCurrency}`;
+        switchLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          void applyPaymentCurrencyFromCardLink(cardCurrency);
+        });
+        cardCurrencyTooltipText.appendChild(switchLink);
+        cardCurrencyTooltip.classList.remove("hidden");
+      }
+    } else {
+      if (cardCurrencyTooltip) {
+        cardCurrencyTooltip.classList.add("hidden");
+      }
+    }
+  }
+
+  async function applyPaymentCurrency(newCurrency, options = {}) {
+    const amount = options.amount ?? CURRENCY_AMOUNTS[newCurrency] ?? 3000;
 
     try {
       await syncPaymentSessionAmount(amount);
     } catch (error) {
-      console.error("Failed to sync session amount for currency switch:", error);
+      console.error(
+        "Failed to sync session amount for currency switch:",
+        error,
+      );
       return;
     }
 
-    requestPayload.currency = cardCurrency;
+    requestPayload.currency = newCurrency;
     requestPayload.amount = amount;
     requestPayload.reference = "ORD-" + Date.now();
     requestPayload.items[0].unit_price = amount;
@@ -398,7 +420,10 @@
         surchargeInfo = null;
       }
     } catch (error) {
-      console.error("Failed to recalculate surcharge after currency switch:", error);
+      console.error(
+        "Failed to recalculate surcharge after currency switch:",
+        error,
+      );
       surchargeInfo = null;
       const warningEl = document.getElementById("commercial-card-warning");
       if (warningEl) {
@@ -406,54 +431,7 @@
       }
     }
 
-    const cardCurrencyTooltipEl = document.getElementById("card-currency-tooltip");
-    if (cardCurrencyTooltipEl) {
-      cardCurrencyTooltipEl.classList.add("hidden");
-    }
-
-    const select = document.getElementById("currency-select");
-    if (select) {
-      let option = select.querySelector(`option[value="${cardCurrency}"]`);
-      if (!option) {
-        option = document.createElement("option");
-        option.value = cardCurrency;
-        option.textContent = cardCurrency;
-        select.appendChild(option);
-      }
-      select.value = cardCurrency;
-    }
-
-    updatePaymentTotalDisplay();
-  }
-
-  async function switchCurrency(newCurrency, options = {}) {
-    const amount =
-      options.amount ?? CURRENCY_AMOUNTS[newCurrency] ?? 3000;
-
-    const pageLoader = document.getElementById("page-loader");
-    if (pageLoader) pageLoader.classList.remove("hidden");
-
-    requestPayload.currency = newCurrency;
-    requestPayload.amount = amount;
-    requestPayload.reference = "ORD-" + Date.now();
-    requestPayload.items[0].unit_price = amount;
-    requestPayload.items[0].total_amount = amount;
-    surchargeInfo = null;
-
-    const warningEl = document.getElementById("commercial-card-warning");
-    if (warningEl) warningEl.classList.add("hidden");
-    const cardCurrencyTooltipEl = document.getElementById("card-currency-tooltip");
-    if (cardCurrencyTooltipEl) cardCurrencyTooltipEl.classList.add("hidden");
-
-    if (cardComponent && typeof cardComponent.unmount === "function") {
-      cardComponent.unmount();
-    }
-    const cardContainer = document.getElementById("card-container");
-    if (cardContainer) {
-      cardContainer.innerHTML = "";
-    }
-
-    await initCheckoutAndMountCard();
+    updateCardCurrencyTooltip();
 
     const select = document.getElementById("currency-select");
     if (select) {
@@ -466,6 +444,12 @@
       }
       select.value = newCurrency;
     }
+
+    updatePaymentTotalDisplay();
+  }
+
+  function applyPaymentCurrencyFromCardLink(cardCurrency) {
+    return applyPaymentCurrency(cardCurrency);
   }
 
   await initCheckoutAndMountCard();
@@ -475,7 +459,7 @@
     currencySelect.addEventListener("change", (e) => {
       const newCurrency = e.target.value;
       if (newCurrency !== requestPayload.currency) {
-        switchCurrency(newCurrency);
+        applyPaymentCurrency(newCurrency);
       }
     });
   }
@@ -538,11 +522,11 @@ async function copyPaymentId() {
         document.body.appendChild(tempInput);
         tempInput.select();
         tempInput.setSelectionRange(0, 99999);
-        document.execCommand('copy');
+        document.execCommand("copy");
         document.body.removeChild(tempInput);
       }
     } catch (err) {
-      console.error('Failed to copy payment ID:', err);
+      console.error("Failed to copy payment ID:", err);
     }
   }
 }

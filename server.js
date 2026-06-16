@@ -24,7 +24,8 @@ const port = process.env.PORT || 3000;
 let accessToken = null;
 let tokenExpiry = null;
 
-// Store surcharge amounts per payment session - simplified for demonstration purposes; use a database in production
+// Store surcharge amounts per payment session
+// simplified for demonstration purposes; use a database in production
 const paymentSessionSurcharges = new Map();
 
 async function getAccessToken() {
@@ -51,12 +52,12 @@ async function getAccessToken() {
           client_id: accessKeyId,
           client_secret: accessKeySecret,
         }),
-      }
+      },
     );
 
     if (!response.ok) {
       throw new Error(
-        `Failed to get access token: ${response.status} ${response.statusText}`
+        `Failed to get access token: ${response.status} ${response.statusText}`,
       );
     }
 
@@ -77,13 +78,13 @@ async function getAccessToken() {
 async function getGlobalPaymentsAccessToken() {
   if (!globalPaymentsAppId || !globalPaymentsAppKey) {
     throw new Error(
-      "GLOBAL_PAYMENTS_APP_ID and GLOBAL_PAYMENTS_APP_KEY required in .env file."
+      "GLOBAL_PAYMENTS_APP_ID and GLOBAL_PAYMENTS_APP_KEY required in .env file.",
     );
   }
 
   const nonce = new Date().toISOString();
   const secret = CryptoJS.SHA512(nonce + "" + globalPaymentsAppKey).toString(
-    CryptoJS.enc.Hex
+    CryptoJS.enc.Hex,
   );
 
   try {
@@ -101,12 +102,12 @@ async function getGlobalPaymentsAccessToken() {
           grant_type: "client_credentials",
           nonce: nonce,
         }),
-      }
+      },
     );
 
     if (!response.ok) {
       throw new Error(
-        `Failed to get Global Payments access token: ${response.status} ${response.statusText}`
+        `Failed to get Global Payments access token: ${response.status} ${response.statusText}`,
       );
     }
 
@@ -169,83 +170,79 @@ app.post("/create-payment-session", async (req, res) => {
       });
     }
 
-    const request = await fetch(
-      `${baseUrl}/payment-sessions`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          amount: amount === 0 ? 0 : amount || 3000,
-          currency: currency || "GBP",
-          billing: billing || {
-            address: {
-              address_line1: "123 High St.",
-              address_line2: "Flat 456",
-              city: "London",
-              zip: "SW1A 1AA",
-              country: "GB",
-            },
-            phone: {
-              number: "7987654321",
-              country_code: "44",
-            },
-          },
-          success_url:
-            success_url || `http://localhost:${port}?status=succeeded`,
-          failure_url: failure_url || `http://localhost:${port}?status=failed`,
-          payment_type: payment_type || "Regular",
-          billing_descriptor: billing_descriptor || {
-            name: "Checkout.com",
+    const request = await fetch(`${baseUrl}/payment-sessions`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        amount: amount === 0 ? 0 : amount || 3000,
+        currency: currency || "GBP",
+        billing: billing || {
+          address: {
+            address_line1: "123 High St.",
+            address_line2: "Flat 456",
             city: "London",
+            zip: "SW1A 1AA",
+            country: "GB",
           },
-          reference: reference || "1234567890",
-          description: description || "Payment",
-          customer: customer || {
-            email: "john.smith@mail.com",
-            name: "John Smith",
-            phone: {
-              country_code: "44",
-              number: "7987654321",
-            },
+          phone: {
+            number: "7987654321",
+            country_code: "44",
           },
-          shipping: shipping || {
-            address: {
-              address_line1: "123 High St.",
-              address_line2: "Flat 456",
-              city: "London",
-              zip: "SW1A 1AA",
-              country: "GB",
-            },
-            phone: {
-              number: "7987654321",
-              country_code: "44",
-            },
+        },
+        success_url: success_url || `http://localhost:${port}?status=succeeded`,
+        failure_url: failure_url || `http://localhost:${port}?status=failed`,
+        payment_type: payment_type || "Regular",
+        billing_descriptor: billing_descriptor || {
+          name: "Checkout.com",
+          city: "London",
+        },
+        reference: reference || "1234567890",
+        description: description || "Payment",
+        customer: customer || {
+          email: "john.smith@mail.com",
+          name: "John Smith",
+          phone: {
+            country_code: "44",
+            number: "7987654321",
           },
-          recipient: recipient,
-          processing: processing,
-          instruction: instruction,
-          processing_channel_id: processing_channel_id || processingChannelId,
-          payment_method_configuration: payment_method_configuration,
-          items: items,
-          amount_allocations: amount_allocations,
-          risk: risk,
-          display_name: display_name,
-          metadata: metadata,
-          locale: locale,
-          "3ds": threeDS,
-          sender: sender,
-          capture: capture,
-          capture_on: capture_on,
-          expires_on: expires_on,
-          enabled_payment_methods: enabled_payment_methods,
-          disabled_payment_methods: disabled_payment_methods,
-          customer_retry: customer_retry,
-        }),
-      }
-    );
+        },
+        shipping: shipping || {
+          address: {
+            address_line1: "123 High St.",
+            address_line2: "Flat 456",
+            city: "London",
+            zip: "SW1A 1AA",
+            country: "GB",
+          },
+          phone: {
+            number: "7987654321",
+            country_code: "44",
+          },
+        },
+        recipient: recipient,
+        processing: processing,
+        instruction: instruction,
+        processing_channel_id: processing_channel_id || processingChannelId,
+        payment_method_configuration: payment_method_configuration,
+        items: items,
+        amount_allocations: amount_allocations,
+        risk: risk,
+        display_name: display_name,
+        metadata: metadata,
+        locale: locale,
+        "3ds": threeDS,
+        sender: sender,
+        capture: capture,
+        capture_on: capture_on,
+        expires_on: expires_on,
+        enabled_payment_methods: enabled_payment_methods,
+        disabled_payment_methods: disabled_payment_methods,
+        customer_retry: customer_retry,
+      }),
+    });
 
     const parsedPayload = await request.json();
 
@@ -280,7 +277,6 @@ app.post("/calculate-surcharge/:paymentSessionId", async (req, res) => {
       });
     }
 
-    // Calculate surcharge based on card category
     let surchargeAmount = 0;
     if (card_category === "commercial") {
       surchargeAmount = 100;
@@ -303,7 +299,7 @@ app.post("/calculate-surcharge/:paymentSessionId", async (req, res) => {
   }
 });
 
-// Keep demo surcharge state aligned when the client changes amount/currency without recreating the session
+// Keep surcharge state aligned when the client changes amount/currency
 app.post("/sync-payment-session-amount/:paymentSessionId", async (req, res) => {
   try {
     const { paymentSessionId } = req.params;
@@ -381,7 +377,7 @@ app.post("/submit-payment-session/:paymentSessionId", async (req, res) => {
           amount: amount,
           ...(currency != null && currency !== "" ? { currency } : {}),
         }),
-      }
+      },
     );
 
     const parsedPayload = await request.json();
@@ -414,37 +410,34 @@ app.post("/create-instrument", async (req, res) => {
       });
     }
 
-    const request = await fetch(
-      `${baseUrl}/instruments`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${authToken}`,
-          "Content-Type": "application/json",
+    const request = await fetch(`${baseUrl}/instruments`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${authToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        type: "token",
+        token: token,
+        account_holder: {
+          billing_address: billing_address || {
+            address_line1: "123 High St.",
+            address_line2: "Flat 456",
+            city: "London",
+            zip: "SW1A 1AA",
+            country: "GB",
+          },
         },
-        body: JSON.stringify({
-          type: "token",
-          token: token,
-          account_holder: {
-            billing_address: billing_address || {
-              address_line1: "123 High St.",
-              address_line2: "Flat 456",
-              city: "London",
-              zip: "SW1A 1AA",
-              country: "GB",
-            },
+        customer: customer || {
+          email: "john.smith@mail.com",
+          name: "John Smith",
+          phone: {
+            country_code: "44",
+            number: "7987654321",
           },
-          customer: customer || {
-            email: "john.smith@mail.com",
-            name: "John Smith",
-            phone: {
-              country_code: "44",
-              number: "7987654321",
-            },
-          },
-        }),
-      }
-    );
+        },
+      }),
+    });
 
     const parsedPayload = await request.json();
 
@@ -584,16 +577,13 @@ app.get("/get-authentication-details", async (req, res) => {
       });
     }
 
-    const request = await fetch(
-      `${baseUrl}/sessions/${authSessionId}`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const request = await fetch(`${baseUrl}/sessions/${authSessionId}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
 
     const parsedPayload = await request.json();
 
@@ -783,7 +773,7 @@ const DESTINATION_CONFIGS = {
       raw: {
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization: `Basic ${Buffer.from(
-          (stripeSecretKey || "") + ":"
+          (stripeSecretKey || "") + ":",
         ).toString("base64")}`,
       },
     },
@@ -829,7 +819,7 @@ app.post("/forward-credentials", async (req, res) => {
     if (!destination || !DESTINATION_CONFIGS[destination]) {
       return res.status(400).json({
         error: `Invalid destination. Supported destinations: ${Object.keys(
-          DESTINATION_CONFIGS
+          DESTINATION_CONFIGS,
         ).join(", ")}`,
       });
     }
@@ -931,7 +921,7 @@ app.post("/forward-credentials", async (req, res) => {
         .replace(/amount=\d+/, `amount=${amount || 3000}`)
         .replace(
           /currency=\w+/,
-          `currency=${(currency || "gbp").toLowerCase()}`
+          `currency=${(currency || "gbp").toLowerCase()}`,
         );
 
       // Add authentication details if provided
@@ -940,29 +930,29 @@ app.post("/forward-credentials", async (req, res) => {
         if (authDetails.protocol_version) {
           authParams.push(
             `payment_method_options[card][three_d_secure][version]=${encodeURIComponent(
-              authDetails.protocol_version
-            )}`
+              authDetails.protocol_version,
+            )}`,
           );
         }
         if (authDetails.eci) {
           authParams.push(
             `payment_method_options[card][three_d_secure][electronic_commerce_indicator]=${encodeURIComponent(
-              authDetails.eci
-            )}`
+              authDetails.eci,
+            )}`,
           );
         }
         if (authDetails.cryptogram) {
           authParams.push(
             `payment_method_options[card][three_d_secure][cryptogram]=${encodeURIComponent(
-              authDetails.cryptogram
-            )}`
+              authDetails.cryptogram,
+            )}`,
           );
         }
         if (authDetails.xid) {
           authParams.push(
             `payment_method_options[card][three_d_secure][transaction_id]=${encodeURIComponent(
-              authDetails.xid
-            )}`
+              authDetails.xid,
+            )}`,
           );
         }
 
@@ -1034,7 +1024,7 @@ app.post("/forward-credentials", async (req, res) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(forwardRequest),
-      }
+      },
     );
 
     const parsedPayload = await request.json();
@@ -1050,6 +1040,6 @@ app.post("/forward-credentials", async (req, res) => {
 
 app.listen(port, () =>
   console.log(
-    `Node server listening on port ${port}: http://localhost:${port}/`
-  )
+    `Node server listening on port ${port}: http://localhost:${port}/`,
+  ),
 );

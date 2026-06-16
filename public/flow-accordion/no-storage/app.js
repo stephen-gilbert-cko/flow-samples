@@ -72,30 +72,32 @@
   const componentValidityState = new Map();
 
   function getCurrentTheme() {
-    const dataTheme = document.documentElement.getAttribute('data-theme');
-    if (dataTheme === 'dark' || dataTheme === 'light') {
+    const dataTheme = document.documentElement.getAttribute("data-theme");
+    if (dataTheme === "dark" || dataTheme === "light") {
       return dataTheme;
     }
     // Check system preference if no theme is set
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
   }
 
   function getAppearance() {
     const theme = getCurrentTheme();
-    if (theme === 'dark') {
+    if (theme === "dark") {
       return {
-        colorAction: '#186aff',
-        colorBackground: '#181818',
-        colorBorder: '#272932',
-        colorDisabled: '#777478',
-        colorError: '#FF3300',
-        colorFormBackground: '#272932',
-        colorFormBorder: '#272932',
-        colorInverse: '#F9F9FB',
-        colorOutline: '#275EC4',
-        colorPrimary: '#F9F9FB',
-        colorSecondary: '#b0b0b0',
-        colorSuccess: '#2ECC71'
+        colorAction: "#186aff",
+        colorBackground: "#181818",
+        colorBorder: "#272932",
+        colorDisabled: "#777478",
+        colorError: "#FF3300",
+        colorFormBackground: "#272932",
+        colorFormBorder: "#272932",
+        colorInverse: "#F9F9FB",
+        colorOutline: "#275EC4",
+        colorPrimary: "#F9F9FB",
+        colorSecondary: "#b0b0b0",
+        colorSuccess: "#2ECC71",
       };
     }
     return undefined; // Use defaults for light theme
@@ -108,7 +110,6 @@
     paymentSession,
     onReady: () => {
       console.log("onReady");
-
       const pageLoader = document.getElementById("page-loader");
       const pageContent = document.getElementById("page-content");
       if (pageLoader) {
@@ -132,8 +133,7 @@
       // Only log if validity state has changed
       if (previousIsValid !== currentIsValid) {
         console.log(
-          `onChange() -> isValid: "${currentIsValid}" for "${component.type
-          }"`
+          `onChange() -> isValid: "${currentIsValid}" for "${component.type}"`,
         );
         componentValidityState.set(component.type, currentIsValid);
       }
@@ -152,7 +152,7 @@
     },
     onTokenized: (_self, tokenizeResult) => {
       console.log("onTokenized:", tokenizeResult);
-    }
+    },
   };
 
   // Add custom appearance if dark theme set
@@ -228,11 +228,11 @@ async function copyPaymentId() {
         document.body.appendChild(tempInput);
         tempInput.select();
         tempInput.setSelectionRange(0, 99999);
-        document.execCommand('copy');
+        document.execCommand("copy");
         document.body.removeChild(tempInput);
       }
     } catch (err) {
-      console.error('Failed to copy payment ID:', err);
+      console.error("Failed to copy payment ID:", err);
     }
   }
 }
