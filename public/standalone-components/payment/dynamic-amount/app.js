@@ -6,6 +6,7 @@
   let paymentSession = null;
   let checkout = null;
   let cardComponent = null;
+  let lastCardMetadata = null;
 
   const CURRENCY_AMOUNTS = { GBP: 3000, AUD: 5800 };
 
@@ -102,6 +103,29 @@
     return result;
   }
 
+  async function syncPaymentSessionAmount(baseAmount) {
+    if (!paymentSession || !paymentSession.id) {
+      throw new Error("Payment session ID not found");
+    }
+    const paymentSessionId = paymentSession.id;
+    const response = await fetch(
+      `/sync-payment-session-amount/${paymentSessionId}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ baseAmount }),
+      }
+    );
+    const result = await response.json();
+    if (!response.ok) {
+      console.error("Error syncing payment session amount", result);
+      throw new Error(result.error || "Failed to sync payment session amount");
+    }
+    return result;
+  }
+
   function getCurrencySymbol(currencyCode) {
     const parts = new Intl.NumberFormat("en-GB", {
       style: "currency",
@@ -150,6 +174,7 @@
       body: JSON.stringify({
         session_data: submitData.session_data,
         amount: paymentAmount,
+        currency: requestPayload.currency,
       }),
     });
 
@@ -234,6 +259,7 @@
     },
     onCardBinChanged: async (component, cardMetadata) => {
       console.log("onCardBinChanged:", cardMetadata);
+      lastCardMetadata = cardMetadata;
 
       const warningElement = document.getElementById("commercial-card-warning");
 
@@ -257,7 +283,22 @@
       const cardCurrencyTooltipText = cardCurrencyTooltip?.querySelector(".card-currency-tooltip-text");
       if (cardMetadata.currency && cardMetadata.currency !== requestPayload.currency) {
         if (cardCurrencyTooltip && cardCurrencyTooltipText) {
-          cardCurrencyTooltipText.textContent = `Your card currency is ${cardMetadata.currency}. Please note that FX fees may be applied by your bank.`;
+          const cardCurrency = cardMetadata.currency;
+          cardCurrencyTooltipText.replaceChildren();
+          cardCurrencyTooltipText.append(
+            document.createTextNode(
+              `Your card currency is ${cardCurrency}. Please note that FX fees may be applied by your bank. `
+            )
+          );
+          const switchLink = document.createElement("a");
+          switchLink.href = "#";
+          switchLink.className = "card-currency-switch-link";
+          switchLink.textContent = `Switch to ${cardCurrency}`;
+          switchLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            void applyPaymentCurrencyFromCardLink(cardCurrency);
+          });
+          cardCurrencyTooltipText.appendChild(switchLink);
           cardCurrencyTooltip.classList.remove("hidden");
         }
       } else {
@@ -296,7 +337,6 @@
     },
     handleSubmit: async (component, submitData) => {
       console.log("handleSubmit:", submitData);
-      // Amount is calculated server-side based on stored surcharge
       const submitResponse = await submitPaymentSession(submitData);
       return submitResponse;
     }
@@ -325,9 +365,70 @@
     updatePaymentTotalDisplay();
   }
 
-  async function switchCurrency(newCurrency) {
-    const amount = CURRENCY_AMOUNTS[newCurrency];
-    if (amount === undefined) return;
+  async function applyPaymentCurrencyFromCardLink(cardCurrency) {
+    const amount = CURRENCY_AMOUNTS[cardCurrency] ?? 3000;
+
+    try {
+      await syncPaymentSessionAmount(amount);
+    } catch (error) {
+      console.error("Failed to sync session amount for currency switch:", error);
+      return;
+    }
+
+    requestPayload.currency = cardCurrency;
+    requestPayload.amount = amount;
+    requestPayload.reference = "ORD-" + Date.now();
+    requestPayload.items[0].unit_price = amount;
+    requestPayload.items[0].total_amount = amount;
+
+    try {
+      if (lastCardMetadata?.card_category === "commercial") {
+        const surchargeResult = await calculateSurcharge(lastCardMetadata);
+        surchargeInfo = surchargeResult;
+        const warningEl = document.getElementById("commercial-card-warning");
+        if (warningEl) {
+          const symbol = getCurrencySymbol(requestPayload.currency);
+          const warningText = warningEl.querySelector(".warning-text");
+          if (warningText) {
+            warningText.textContent = `A ${symbol}1 commercial card surcharge will be applied to this transaction.`;
+          }
+          warningEl.classList.remove("hidden");
+        }
+      } else {
+        surchargeInfo = null;
+      }
+    } catch (error) {
+      console.error("Failed to recalculate surcharge after currency switch:", error);
+      surchargeInfo = null;
+      const warningEl = document.getElementById("commercial-card-warning");
+      if (warningEl) {
+        warningEl.classList.add("hidden");
+      }
+    }
+
+    const cardCurrencyTooltipEl = document.getElementById("card-currency-tooltip");
+    if (cardCurrencyTooltipEl) {
+      cardCurrencyTooltipEl.classList.add("hidden");
+    }
+
+    const select = document.getElementById("currency-select");
+    if (select) {
+      let option = select.querySelector(`option[value="${cardCurrency}"]`);
+      if (!option) {
+        option = document.createElement("option");
+        option.value = cardCurrency;
+        option.textContent = cardCurrency;
+        select.appendChild(option);
+      }
+      select.value = cardCurrency;
+    }
+
+    updatePaymentTotalDisplay();
+  }
+
+  async function switchCurrency(newCurrency, options = {}) {
+    const amount =
+      options.amount ?? CURRENCY_AMOUNTS[newCurrency] ?? 3000;
 
     const pageLoader = document.getElementById("page-loader");
     if (pageLoader) pageLoader.classList.remove("hidden");
@@ -355,7 +456,16 @@
     await initCheckoutAndMountCard();
 
     const select = document.getElementById("currency-select");
-    if (select) select.value = newCurrency;
+    if (select) {
+      let option = select.querySelector(`option[value="${newCurrency}"]`);
+      if (!option) {
+        option = document.createElement("option");
+        option.value = newCurrency;
+        option.textContent = newCurrency;
+        select.appendChild(option);
+      }
+      select.value = newCurrency;
+    }
   }
 
   await initCheckoutAndMountCard();

@@ -303,10 +303,42 @@ app.post("/calculate-surcharge/:paymentSessionId", async (req, res) => {
   }
 });
 
+// Keep demo surcharge state aligned when the client changes amount/currency without recreating the session
+app.post("/sync-payment-session-amount/:paymentSessionId", async (req, res) => {
+  try {
+    const { paymentSessionId } = req.params;
+    const { baseAmount } = req.body;
+
+    if (typeof baseAmount !== "number" || Number.isNaN(baseAmount)) {
+      return res.status(400).json({
+        error: "baseAmount must be a number (minor currency units)",
+      });
+    }
+
+    const sessionData = paymentSessionSurcharges.get(paymentSessionId);
+    if (!sessionData) {
+      return res.status(404).json({
+        error: "Payment session not found",
+      });
+    }
+
+    sessionData.baseAmount = baseAmount;
+    sessionData.surchargeAmount = 0;
+    paymentSessionSurcharges.set(paymentSessionId, sessionData);
+
+    res.json({ ok: true, baseAmount: sessionData.baseAmount });
+  } catch (error) {
+    console.error("Error syncing payment session amount:", error);
+    res.status(500).json({
+      error: "Internal server error while syncing payment session amount",
+    });
+  }
+});
+
 app.post("/submit-payment-session/:paymentSessionId", async (req, res) => {
   try {
     const { paymentSessionId } = req.params;
-    const { session_data, amount } = req.body;
+    const { session_data, amount, currency } = req.body;
 
     // Validate amount matches expected base + surcharge
     const sessionData = paymentSessionSurcharges.get(paymentSessionId);
@@ -347,6 +379,7 @@ app.post("/submit-payment-session/:paymentSessionId", async (req, res) => {
         body: JSON.stringify({
           session_data: session_data,
           amount: amount,
+          ...(currency != null && currency !== "" ? { currency } : {}),
         }),
       }
     );

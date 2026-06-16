@@ -1,3 +1,8 @@
+/* Avoid horizontal jump when tooltip toggles page height across the “needs scrollbar” threshold */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 2rem 3rem 3rem 3rem;
   font-family: 'Monospace', monospace;
@@ -243,6 +248,18 @@ html[data-theme="dark"] .currency-switcher select {
 .card-currency-tooltip .tooltip-icon {
   font-size: 18px;
   flex-shrink: 0;
+}
+
+.card-currency-tooltip .card-currency-switch-link {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+.card-currency-tooltip .card-currency-switch-link:hover {
+  text-decoration-thickness: 0.1rem;
 }
 
 @media (prefers-color-scheme: dark) {
