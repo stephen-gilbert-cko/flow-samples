@@ -1,0 +1,24 @@
+.git
+.gitignore
+.gitattributes
+.github
+
+node_modules
+npm-debug.log*
+yarn-error.log*
+
+# Secrets are passed in at runtime, never baked into the image
+.env
+.env.*
+
+.claude
+CLAUDE.md
+CLAUDE.local.md
+.vscode
+.idea
+.DS_Store
+
+Dockerfile
+.dockerignore
+README.md
+nodemon.json
