@@ -136,11 +136,11 @@ code {
 
   html:not([data-theme]) .back-link a:hover {
     color: #6bb0ff;
-    background-color: #2a2a2a;
+    background-color: #272932;
   }
 
   html:not([data-theme]) code {
-    background-color: #2a2a2a;
+    background-color: #272932;
     color: #e0e0e0;
   }
 }
@@ -156,11 +156,11 @@ html[data-theme="dark"] .back-link a {
 
 html[data-theme="dark"] .back-link a:hover {
   color: #6bb0ff;
-  background-color: #2a2a2a;
+  background-color: #272932;
 }
 
 html[data-theme="dark"] code {
-  background-color: #2a2a2a;
+  background-color: #272932;
   color: #e0e0e0;
 }
 

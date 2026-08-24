@@ -12,6 +12,7 @@ const {
   accessKeySecret,
   processingChannelId,
   customerId,
+  applePayUrl,
   adyenApiKey,
   adyenMerchantAccount,
   stripeSecretKey,
@@ -119,9 +120,9 @@ async function getGlobalPaymentsAccessToken() {
   }
 }
 
-// Get public API key and customer ID from config
+// Get public API key, customer ID, and Apple Pay page URL from config
 app.get("/config", (_req, res) => {
-  res.json({ publicKey, customerId });
+  res.json({ publicKey, customerId, applePayUrl });
 });
 
 app.post("/create-payment-session", async (req, res) => {

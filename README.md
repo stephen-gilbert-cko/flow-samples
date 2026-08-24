@@ -28,6 +28,7 @@ Within the [/public](/public) folder, you'll find a number of example [Flow](htt
 
    - Set `BASE_URL` to your client-specific Checkout.com Sandbox API base URL.
    - To test stored card flows, set `CUSTOMER_ID` to your Checkout.com Sandbox customer ID.
+   - To test Apple Pay in a cross-domain iframe, set `APPLE_PAY_URL` to the URL of the external page to load in the iframe.
    - To test credential forwarding, set your external provider Sandbox API credentials.
 
    ``` dotenv
@@ -36,6 +37,9 @@ Within the [/public](/public) folder, you'll find a number of example [Flow](htt
 
    # Stored card payments
    CUSTOMER_ID="cus_..."
+
+   # Apple Pay in a cross-domain iframe
+   APPLE_PAY_URL="https://..."
    
    # ------ Supported forward destinations ------
    # Stripe
