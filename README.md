@@ -1,6 +1,6 @@
 # Flow Samples
 
-Within the [/public](/public) folder, you'll find a number of example [Flow](https://www.checkout.com/docs/payments/accept-payments/accept-a-payment-on-your-website) integrations - each demonstrating different possible configurations.
+Within the [/public](/public) directory, you'll find a number of example [Flow](https://www.checkout.com/docs/payments/accept-payments/accept-a-payment-on-your-website) integrations - each demonstrating different possible configurations.
 
 ## Get started
 
