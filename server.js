@@ -6,6 +6,7 @@ app.use(express.static("public"));
 app.use(express.json());
 const {
   baseUrl,
+  accessUrl,
   publicKey,
   secretKey,
   accessKeyId,
@@ -42,7 +43,7 @@ async function getAccessToken() {
 
   try {
     const response = await fetch(
-      "https://access.sandbox.checkout.com/connect/token",
+      `${accessUrl}/connect/token`,
       {
         method: "POST",
         headers: {

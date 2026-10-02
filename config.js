@@ -19,8 +19,17 @@ function getBaseUrl() {
   return normalizedUrl;
 }
 
+// Derive the access (OAuth) URL from the API base URL,
+// e.g. https://{prefix}.api.sandbox.checkout.com -> https://{prefix}.access.sandbox.checkout.com
+function getAccessUrl(baseUrl) {
+  return baseUrl.replace(/(\/\/|\.)api\./, "$1access.");
+}
+
+const baseUrl = getBaseUrl();
+
 module.exports = {
-  baseUrl: getBaseUrl(),
+  baseUrl,
+  accessUrl: getAccessUrl(baseUrl),
   publicKey: process.env.PUBLIC_KEY,
   secretKey: process.env.SECRET_KEY,
   accessKeyId: process.env.ACCESS_KEY_ID,
